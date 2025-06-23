@@ -22,8 +22,11 @@ const multipleExportsRule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Enforce a single export per file (excluding barrel files)',
+      description:
+        'Enforce a single export per file to improve code organization and maintainability (excluding barrel files)',
+      category: 'Best Practices',
       recommended: false,
+      url: 'https://github.com/tsla-linter/tsla-linter/blob/main/docs/rules/no-multiple-exports.md',
     },
     fixable: undefined,
     schema: [
@@ -33,26 +36,32 @@ const multipleExportsRule: Rule.RuleModule = {
           checkClasses: {
             type: 'boolean',
             default: true,
+            description: 'Check for multiple class exports in a single file',
           },
           checkFunctions: {
             type: 'boolean',
             default: true,
+            description: 'Check for multiple function exports in a single file',
           },
           checkInterfaces: {
             type: 'boolean',
             default: true,
+            description: 'Check for multiple interface exports in a single file',
           },
           checkTypes: {
             type: 'boolean',
             default: true,
+            description: 'Check for multiple type alias exports in a single file',
           },
           checkVariables: {
             type: 'boolean',
             default: true,
+            description: 'Check for multiple variable/constant exports in a single file',
           },
           ignoreBarrelFiles: {
             type: 'boolean',
             default: true,
+            description: 'Ignore files that appear to be barrel files (index.ts, index.js)',
           },
         },
         additionalProperties: false,
