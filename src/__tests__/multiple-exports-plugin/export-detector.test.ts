@@ -4,6 +4,12 @@ import {
   detectExports,
   analyzeFileExports,
   getExportTypeSummary,
+  countExportsByType,
+  getDetailedExportSummary,
+  classifyExportsByCategory,
+  hasMultipleExportsOfType,
+  isTypeOnlyExport,
+  isRuntimeExport,
   ExportInfo,
 } from '../../linters/multiple-exports-plugin/export-detector';
 
@@ -376,6 +382,238 @@ describe('export-detector', () => {
     test('should handle empty exports', () => {
       const result = getExportTypeSummary([]);
       expect(result).toBe('');
+    });
+  });
+
+  describe('countExportsByType', () => {
+    test('should count exports by type correctly', () => {
+      const exports: ExportInfo[] = [
+        { type: 'function', name: 'func1', node: {} as any },
+        { type: 'function', name: 'func2', node: {} as any },
+        { type: 'class', name: 'Class1', node: {} as any },
+        { type: 'interface', name: 'Interface1', node: {} as any },
+        { type: 'type', name: 'Type1', node: {} as any },
+        { type: 'variable', name: 'var1', node: {} as any },
+        { type: 'default', name: 'default', node: {} as any },
+        { type: 'specifier', name: 'spec1', node: {} as any },
+      ];
+
+      const counts = countExportsByType(exports);
+      expect(counts).toEqual({
+        classes: 1,
+        functions: 2,
+        interfaces: 1,
+        types: 1,
+        variables: 1,
+        defaults: 1,
+        specifiers: 1,
+        total: 8,
+      });
+    });
+
+    test('should handle empty exports array', () => {
+      const counts = countExportsByType([]);
+      expect(counts).toEqual({
+        classes: 0,
+        functions: 0,
+        interfaces: 0,
+        types: 0,
+        variables: 0,
+        defaults: 0,
+        specifiers: 0,
+        total: 0,
+      });
+    });
+  });
+
+  describe('hasMultipleExportsOfType', () => {
+    const exports: ExportInfo[] = [
+      { type: 'function', name: 'func1', node: {} as any },
+      { type: 'function', name: 'func2', node: {} as any },
+      { type: 'class', name: 'Class1', node: {} as any },
+    ];
+
+    test('should return true for multiple exports of same type', () => {
+      expect(hasMultipleExportsOfType(exports, 'function')).toBe(true);
+    });
+
+    test('should return false for single export of type', () => {
+      expect(hasMultipleExportsOfType(exports, 'class')).toBe(false);
+    });
+
+    test('should return false for non-existent type', () => {
+      expect(hasMultipleExportsOfType(exports, 'interface')).toBe(false);
+    });
+  });
+
+  describe('getDetailedExportSummary', () => {
+    test('should generate detailed summary for mixed exports', () => {
+      const exports: ExportInfo[] = [
+        { type: 'function', name: 'func1', node: {} as any },
+        { type: 'function', name: 'func2', node: {} as any },
+        { type: 'class', name: 'Class1', node: {} as any },
+        { type: 'interface', name: 'Interface1', node: {} as any },
+        { type: 'type', name: 'Type1', node: {} as any },
+        { type: 'variable', name: 'var1', node: {} as any },
+        { type: 'default', name: 'default', node: {} as any },
+        { type: 'specifier', name: 'spec1', node: {} as any },
+        { type: 'specifier', name: 'spec2', node: {} as any },
+      ];
+
+      const result = getDetailedExportSummary(exports);
+      expect(result).toBe(
+        '1 class, 2 functions, 1 interface, 1 type, 1 variable, 1 default export, 2 export specifiers',
+      );
+    });
+
+    test('should handle single export correctly', () => {
+      const exports: ExportInfo[] = [{ type: 'function', name: 'func1', node: {} as any }];
+
+      const result = getDetailedExportSummary(exports);
+      expect(result).toBe('1 function');
+    });
+
+    test('should handle empty exports', () => {
+      const result = getDetailedExportSummary([]);
+      expect(result).toBe('');
+    });
+  });
+
+  describe('classifyExportsByCategory', () => {
+    test('should classify exports by category', () => {
+      const exports: ExportInfo[] = [
+        { type: 'function', name: 'func1', node: {} as any },
+        { type: 'class', name: 'Class1', node: {} as any },
+        { type: 'interface', name: 'Interface1', node: {} as any },
+        { type: 'type', name: 'Type1', node: {} as any },
+        { type: 'variable', name: 'var1', node: {} as any },
+        { type: 'default', name: 'default', node: {} as any },
+        { type: 'specifier', name: 'spec1', node: {} as any },
+      ];
+
+      const result = classifyExportsByCategory(exports);
+      expect(result.declarations).toHaveLength(5); // function, class, interface, type, variable
+      expect(result.specifiers).toHaveLength(1);
+      expect(result.defaults).toHaveLength(1);
+    });
+
+    test('should handle empty exports', () => {
+      const result = classifyExportsByCategory([]);
+      expect(result.declarations).toHaveLength(0);
+      expect(result.specifiers).toHaveLength(0);
+      expect(result.defaults).toHaveLength(0);
+    });
+  });
+
+  describe('isTypeOnlyExport', () => {
+    test('should identify type-only exports', () => {
+      expect(isTypeOnlyExport({ type: 'interface', name: 'Interface1', node: {} as any })).toBe(
+        true,
+      );
+      expect(isTypeOnlyExport({ type: 'type', name: 'Type1', node: {} as any })).toBe(true);
+    });
+
+    test('should identify runtime exports', () => {
+      expect(isTypeOnlyExport({ type: 'class', name: 'Class1', node: {} as any })).toBe(false);
+      expect(isTypeOnlyExport({ type: 'function', name: 'func1', node: {} as any })).toBe(false);
+      expect(isTypeOnlyExport({ type: 'variable', name: 'var1', node: {} as any })).toBe(false);
+      expect(isTypeOnlyExport({ type: 'default', name: 'default', node: {} as any })).toBe(false);
+      expect(isTypeOnlyExport({ type: 'specifier', name: 'spec1', node: {} as any })).toBe(false);
+    });
+  });
+
+  describe('isRuntimeExport', () => {
+    test('should identify runtime exports', () => {
+      expect(isRuntimeExport({ type: 'class', name: 'Class1', node: {} as any })).toBe(true);
+      expect(isRuntimeExport({ type: 'function', name: 'func1', node: {} as any })).toBe(true);
+      expect(isRuntimeExport({ type: 'variable', name: 'var1', node: {} as any })).toBe(true);
+      expect(isRuntimeExport({ type: 'default', name: 'default', node: {} as any })).toBe(true);
+      expect(isRuntimeExport({ type: 'specifier', name: 'spec1', node: {} as any })).toBe(true);
+    });
+
+    test('should identify type-only exports', () => {
+      expect(isRuntimeExport({ type: 'interface', name: 'Interface1', node: {} as any })).toBe(
+        false,
+      );
+      expect(isRuntimeExport({ type: 'type', name: 'Type1', node: {} as any })).toBe(false);
+    });
+  });
+
+  describe('detectExports - enhanced TypeScript support', () => {
+    const filename = '/test/file.ts';
+
+    test('should detect TypeScript enum export', () => {
+      const node = {
+        type: 'ExportNamedDeclaration',
+        declaration: {
+          type: 'TSEnumDeclaration',
+          id: { name: 'MyEnum', type: 'Identifier' },
+        },
+      } as any;
+
+      const result = detectExports(node, filename);
+      expect(result).toEqual({
+        type: 'type',
+        name: 'MyEnum',
+        node,
+      });
+    });
+
+    test('should handle arrow function default exports', () => {
+      const node = {
+        type: 'ExportDefaultDeclaration',
+        declaration: {
+          type: 'ArrowFunctionExpression',
+        },
+      } as any;
+
+      const result = detectExports(node, filename);
+      expect(result).toEqual({
+        type: 'default',
+        name: 'default arrow function',
+        node,
+      });
+    });
+
+    test('should handle function expression default exports', () => {
+      const node = {
+        type: 'ExportDefaultDeclaration',
+        declaration: {
+          type: 'FunctionExpression',
+        },
+      } as any;
+
+      const result = detectExports(node, filename);
+      expect(result).toEqual({
+        type: 'default',
+        name: 'default function expression',
+        node,
+      });
+    });
+
+    test('should respect configuration for default exports', () => {
+      const node = {
+        type: 'ExportDefaultDeclaration',
+        declaration: {
+          type: 'ClassDeclaration',
+          id: { name: 'MyClass', type: 'Identifier' },
+        },
+      } as any;
+
+      const result = detectExports(node, filename, { checkClasses: false });
+      expect(result).toBeNull();
+    });
+
+    test('should respect configuration for arrow functions', () => {
+      const node = {
+        type: 'ExportDefaultDeclaration',
+        declaration: {
+          type: 'ArrowFunctionExpression',
+        },
+      } as any;
+
+      const result = detectExports(node, filename, { checkFunctions: false });
+      expect(result).toBeNull();
     });
   });
 });

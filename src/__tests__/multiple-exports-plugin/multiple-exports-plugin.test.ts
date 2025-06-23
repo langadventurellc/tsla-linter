@@ -69,7 +69,7 @@ export function func2() { return 2; }`,
               {
                 messageId: 'multipleExportsDetailed',
                 data: {
-                  exportTypes: 'function',
+                  exportTypes: '2 functions',
                 },
               },
             ],
@@ -82,7 +82,7 @@ export class Class2 {}`,
               {
                 messageId: 'multipleExportsDetailed',
                 data: {
-                  exportTypes: 'class',
+                  exportTypes: '2 classes',
                 },
               },
             ],
@@ -95,7 +95,7 @@ export class MyClass {}`,
               {
                 messageId: 'multipleExportsDetailed',
                 data: {
-                  exportTypes: 'function, class',
+                  exportTypes: '1 class, 1 function',
                 },
               },
             ],
@@ -108,7 +108,7 @@ export { a, b };`,
               {
                 messageId: 'multipleExportsDetailed',
                 data: {
-                  exportTypes: 'specifier',
+                  exportTypes: '2 export specifiers',
                 },
               },
             ],
@@ -121,7 +121,7 @@ export const myVar = 42;`,
               {
                 messageId: 'multipleExportsDetailed',
                 data: {
-                  exportTypes: 'default, variable',
+                  exportTypes: '1 variable, 1 default export',
                 },
               },
             ],
@@ -192,7 +192,7 @@ export function func2() { return 2; }`,
                 {
                   messageId: 'multipleExportsDetailed',
                   data: {
-                    exportTypes: 'function',
+                    exportTypes: '2 functions',
                   },
                 },
               ],
@@ -221,7 +221,7 @@ export class Class2 {}`,
                 {
                   messageId: 'multipleExportsDetailed',
                   data: {
-                    exportTypes: 'class',
+                    exportTypes: '2 classes',
                   },
                 },
               ],
@@ -244,7 +244,7 @@ export function func2() { return 2; }`,
                 {
                   messageId: 'multipleExportsDetailed',
                   data: {
-                    exportTypes: 'function',
+                    exportTypes: '2 functions',
                   },
                 },
               ],
@@ -281,7 +281,124 @@ export const b = 2;`,
               {
                 messageId: 'multipleExportsDetailed',
                 data: {
-                  exportTypes: 'variable',
+                  exportTypes: '2 variables',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    describe('enhanced configuration filtering', () => {
+      ruleTester.run('no-multiple-exports (enhanced filtering)', rule, {
+        valid: [
+          // TypeScript interfaces should be ignored when checkInterfaces is false
+          {
+            code: `export interface Interface1 { value: string; }
+export interface Interface2 { count: number; }`,
+            options: [{ checkInterfaces: false }],
+          },
+          // TypeScript types should be ignored when checkTypes is false
+          {
+            code: `export type Type1 = string | number;
+export type Type2 = boolean;`,
+            options: [{ checkTypes: false }],
+          },
+          // Mixed exports where only some types are checked
+          {
+            code: `export class MyClass {}
+export interface MyInterface { value: string; }`,
+            options: [{ checkInterfaces: false }],
+          },
+        ],
+        invalid: [
+          // Should still report when multiple enabled export types exist
+          {
+            code: `export class Class1 {}
+export class Class2 {}
+export interface Interface1 { value: string; }`,
+            options: [{ checkInterfaces: false }],
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '2 classes',
+                },
+              },
+            ],
+          },
+          // Should report detailed export summary
+          {
+            code: `export function func1() { return 1; }
+export function func2() { return 2; }
+export class MyClass {}`,
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '1 class, 2 functions',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    describe('TypeScript support', () => {
+      ruleTester.run('no-multiple-exports (TypeScript)', rule, {
+        valid: [
+          // Single enum export
+          {
+            code: 'export enum MyEnum { A, B, C }',
+          },
+          // Single interface export
+          {
+            code: 'export interface MyInterface { value: string; }',
+          },
+          // Single type alias export
+          {
+            code: 'export type MyType = string | number;',
+          },
+        ],
+        invalid: [
+          // Multiple interface exports
+          {
+            code: `export interface Interface1 { value: string; }
+export interface Interface2 { count: number; }`,
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '2 interfaces',
+                },
+              },
+            ],
+          },
+          // Multiple type exports
+          {
+            code: `export type Type1 = string;
+export type Type2 = number;`,
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '2 types',
+                },
+              },
+            ],
+          },
+          // Mixed TypeScript and JavaScript exports
+          {
+            code: `export interface MyInterface { value: string; }
+export class MyClass {}
+export type MyType = string;`,
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '1 class, 1 interface, 1 type',
                 },
               },
             ],

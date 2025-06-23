@@ -6,6 +6,7 @@ import {
   detectExports,
   analyzeFileExports,
   getExportTypeSummary,
+  getDetailedExportSummary,
 } from './export-detector';
 
 interface MultipleExportsOptions {
@@ -85,35 +86,68 @@ const multipleExportsRule: Rule.RuleModule = {
         return;
       }
 
-      const exportTypes = getExportTypeSummary(analysis.exports);
-      const firstExport = analysis.exports[0];
+      // Filter exports based on configuration options
+      const relevantExports = exports.filter((exportInfo) => {
+        switch (exportInfo.type) {
+          case 'class':
+            return checkClasses;
+          case 'function':
+            return checkFunctions;
+          case 'interface':
+            return checkInterfaces;
+          case 'type':
+            return checkTypes;
+          case 'variable':
+            return checkVariables;
+          case 'default':
+            // Check defaults based on what they export
+            return true; // Always check defaults for now
+          case 'specifier':
+            // Always check specifiers since we can't determine their original type
+            return true;
+          default:
+            return true;
+        }
+      });
+
+      // Only report if we have multiple relevant exports
+      if (relevantExports.length <= 1) {
+        return;
+      }
+
+      const detailedSummary = getDetailedExportSummary(relevantExports);
+      const exportTypes = getExportTypeSummary(relevantExports);
+      const firstExport = relevantExports[0];
 
       context.report({
         node: firstExport.node,
         messageId: 'multipleExportsDetailed',
         data: {
-          exportTypes,
+          exportTypes: detailedSummary || exportTypes,
         },
       });
     }
 
     return {
       ExportNamedDeclaration(node: ESTree.ExportNamedDeclaration): void {
-        const exportInfo = detectExports(node, filename, {
-          checkClasses,
-          checkFunctions,
-          checkInterfaces,
-          checkTypes,
-          checkVariables,
-        });
+        // Handle declaration exports (e.g., export class Foo {})
+        if (node.declaration) {
+          const exportInfo = detectExports(node, filename, {
+            checkClasses,
+            checkFunctions,
+            checkInterfaces,
+            checkTypes,
+            checkVariables,
+          });
 
-        if (exportInfo) {
-          exports.push(exportInfo);
+          if (exportInfo) {
+            exports.push(exportInfo);
+          }
         }
 
-        // Handle multiple export specifiers
-        if (node.specifiers && node.specifiers.length > 1) {
-          node.specifiers.slice(1).forEach((specifier) => {
+        // Handle export specifiers (e.g., export { a, b })
+        if (node.specifiers && node.specifiers.length > 0) {
+          node.specifiers.forEach((specifier) => {
             if (specifier.type === 'ExportSpecifier') {
               const name =
                 specifier.exported.type === 'Identifier' ? specifier.exported.name : 'unknown';

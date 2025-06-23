@@ -109,15 +109,18 @@ sequenceDiagram
   - `src/__tests__/multiple-exports-plugin/multiple-exports-plugin.test.ts` - Comprehensive test suite for the main plugin with various scenarios including barrel file exemption and configuration options
   - `src/__tests__/multiple-exports-plugin/export-detector.test.ts` - Unit tests for the export detector utility functions covering all export types and edge cases
 
-- [ ] 2.0 **Export Detection Logic Implementation**
-  - [ ] 2.1 Implement AST visitor for ExportNamedDeclaration and ExportDefaultDeclaration nodes
-  - [ ] 2.2 Create export counting logic for classes, functions, and interfaces
-  - [ ] 2.3 Add export type classification (class/function/interface identification)
-  - [ ] 2.4 Implement configuration-based filtering of export types to check
-  - [ ] 2.5 Write comprehensive tests for export detection scenarios
+- [x] 2.0 **Export Detection Logic Implementation**
+  - [x] 2.1 Implement AST visitor for ExportNamedDeclaration and ExportDefaultDeclaration nodes
+  - [x] 2.2 Create export counting logic for classes, functions, and interfaces
+  - [x] 2.3 Add export type classification (class/function/interface identification)
+  - [x] 2.4 Implement configuration-based filtering of export types to check
+  - [x] 2.5 Write comprehensive tests for export detection scenarios
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/multiple-exports-plugin/export-detector.ts` - Enhanced TypeScript support with proper AST node detection for interfaces, types, and enums; added export counting utilities (`countExportsByType`, `hasMultipleExportsOfType`); improved export classification with functions for categorizing by runtime vs type-only exports; added detailed export summary generation
+  - `src/linters/multiple-exports-plugin/multiple-exports-plugin.ts` - Improved AST visitor logic to handle export specifiers more efficiently; enhanced configuration-based filtering in violation detection; integrated detailed export summary reporting for better error messages
+  - `src/__tests__/multiple-exports-plugin/export-detector.test.ts` - Added comprehensive tests for all new utility functions including export counting, classification, and TypeScript support; enhanced coverage for configuration options and edge cases
+  - `src/__tests__/multiple-exports-plugin/multiple-exports-plugin.test.ts` - Updated existing tests to match enhanced error message format; added new test scenarios for TypeScript constructs and configuration filtering; improved test coverage for barrel file exemption and mixed export scenarios
 
 - [ ] 3.0 **Rule Logic and Violation Detection**
   - [ ] 3.1 Implement main rule logic with context.report() for violations
