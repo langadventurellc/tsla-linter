@@ -48,12 +48,6 @@ jobs:
 
 workflows:
   build-test-and-lint:
-    when:
-      and:
-        - not:
-            equal: [force-deploy, << pipeline.parameters.action >>]
-        - not:
-            equal: [main, << pipeline.git.branch >>]
     jobs:
       - test:
           context:
