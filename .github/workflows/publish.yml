@@ -13,24 +13,24 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@langadventurellc'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run quality checks
         run: |
           npm run lint
           npm run format
           npm test
           npm run build
-      
+
       - name: Determine version
         id: version
         run: |
@@ -46,7 +46,7 @@ jobs:
             echo "Publishing release version: $PACKAGE_VERSION"
           fi
           echo "version=$PUBLISH_VERSION" >> $GITHUB_OUTPUT
-      
+
       - name: Publish to GitHub Packages
         run: npm publish
         env:

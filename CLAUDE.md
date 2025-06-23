@@ -28,13 +28,11 @@ A collection of ESLint plugins for custom linting tools.
    ```
 
 4. **File Organization**:
-
    - One export per file (exceptions require user approval)
    - Barrel files (`index.ts`) are allowed
    - Follow existing naming: PascalCase for components, camelCase for utilities
 
 5. **Code Quality**:
-
    - Functions < 25 statements, classes < 200 statements
 
 6. **User Confirmation Required For**:

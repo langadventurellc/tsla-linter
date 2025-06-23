@@ -7,11 +7,13 @@ A collection of custom ESLint plugins for enforcing code quality standards.
 This package is published to GitHub Packages. To install:
 
 1. Create a `.npmrc` file in your project root:
+
 ```
 @langadventurellc:registry=https://npm.pkg.github.com
 ```
 
 2. Install the package:
+
 ```bash
 npm install @langadventurellc/tsla-linter --save-dev
 ```
@@ -27,12 +29,12 @@ import tslaLinter from '@langadventurellc/tsla-linter';
 export default [
   {
     plugins: {
-      'tsla': tslaLinter
+      tsla: tslaLinter,
     },
     rules: {
-      'tsla/no-foo': 'error'
-    }
-  }
+      'tsla/no-foo': 'error',
+    },
+  },
 ];
 ```
 
@@ -62,6 +64,7 @@ npm run format
 ## Publishing
 
 The package is automatically published to GitHub Packages when pushing to any branch:
+
 - `main` branch: Publishes the version from package.json
 - Other branches: Publishes a prerelease version with branch name and timestamp
 
