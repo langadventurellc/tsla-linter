@@ -178,15 +178,27 @@ sequenceDiagram
   - Updated existing tests to account for improved statement counting accuracy
   - All quality checks pass (lint, format, test, build all successful)
 
-- [ ] 4.0 Create Main Plugin Module
-  - [ ] 4.1 Create main plugin file exporting both rules
-  - [ ] 4.2 Define plugin configuration structure with recommended presets
-  - [ ] 4.3 Implement plugin metadata and documentation
-  - [ ] 4.4 Write integration tests for the complete plugin
-  - [ ] 4.5 Test plugin with various ESLint configurations
+- [x] 4.0 Create Main Plugin Module
+  - [x] 4.1 Create main plugin file exporting both rules
+  - [x] 4.2 Define plugin configuration structure with recommended presets
+  - [x] 4.3 Implement plugin metadata and documentation
+  - [x] 4.4 Write integration tests for the complete plugin
+  - [x] 4.5 Test plugin with various ESLint configurations
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/statement-count-plugin.ts` - Already contained complete plugin implementation with both rules, configurations, and metadata (no changes needed)
+  - `src/__tests__/statement-count-plugin.test.ts` - Added comprehensive integration tests for plugin configurations including recommended and strict presets, plugin structure validation, and rule metadata verification
+  - `src/types.ts` - Added PluginConfig interface to improve type safety for ESLint plugin configurations and reduce TypeScript strict checking issues
+  - `src/linters/example-plugin.ts` - Updated to match new PluginConfig type structure
+
+  **Implementation Summary:**
+  - Completed main plugin module with full implementation already in place
+  - Added integration tests covering both recommended and strict configuration presets
+  - Validated plugin structure and rule metadata through comprehensive test suite
+  - Tested plugin configurations with proper threshold validation
+  - Enhanced type safety with improved PluginConfig interface
+  - All quality checks pass (lint, format, test, build all successful)
+  - Plugin is ready for export and integration into the main project
 
 - [ ] 5.0 Update Project Exports and Integration
   - [ ] 5.1 Update main index.ts to export new plugin

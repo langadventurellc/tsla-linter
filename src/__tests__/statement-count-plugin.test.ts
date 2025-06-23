@@ -1,5 +1,6 @@
 import { RuleTester, Rule } from 'eslint';
 import { statementCountPlugin } from '../linters/statement-count-plugin';
+import { PluginConfig } from '../types';
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -845,6 +846,128 @@ describe('statement-count-plugin', () => {
           mockContext as unknown as Rule.RuleContext,
         );
       }).toThrow('warnThreshold must be less than errorThreshold');
+    });
+  });
+
+  describe('plugin configurations', () => {
+    describe('recommended configuration', () => {
+      test('should have correct rule configurations', () => {
+        expect(statementCountPlugin.configs).toBeDefined();
+        if (!statementCountPlugin.configs) return;
+
+        const recommendedConfig = statementCountPlugin.configs.recommended as PluginConfig;
+
+        expect(recommendedConfig.rules['statement-count/function-statement-count']).toEqual([
+          'warn',
+          { warnThreshold: 25, errorThreshold: 50 },
+        ]);
+        expect(recommendedConfig.rules['statement-count/class-statement-count']).toEqual([
+          'warn',
+          { warnThreshold: 200, errorThreshold: 300 },
+        ]);
+      });
+
+      test('should validate recommended function thresholds', () => {
+        if (!statementCountPlugin.configs) return;
+
+        const recommendedConfig = statementCountPlugin.configs.recommended as PluginConfig;
+        const config = recommendedConfig.rules['statement-count/function-statement-count'];
+
+        expect(config).toEqual(['warn', { warnThreshold: 25, errorThreshold: 50 }]);
+        expect((config[1] as { warnThreshold: number }).warnThreshold).toBe(25);
+        expect((config[1] as { errorThreshold: number }).errorThreshold).toBe(50);
+      });
+
+      test('should validate recommended class thresholds', () => {
+        if (!statementCountPlugin.configs) return;
+
+        const recommendedConfig = statementCountPlugin.configs.recommended as PluginConfig;
+        const config = recommendedConfig.rules['statement-count/class-statement-count'];
+
+        expect(config).toEqual(['warn', { warnThreshold: 200, errorThreshold: 300 }]);
+        expect((config[1] as { warnThreshold: number }).warnThreshold).toBe(200);
+        expect((config[1] as { errorThreshold: number }).errorThreshold).toBe(300);
+      });
+    });
+
+    describe('strict configuration', () => {
+      test('should have correct rule configurations', () => {
+        expect(statementCountPlugin.configs).toBeDefined();
+        if (!statementCountPlugin.configs) return;
+
+        const strictConfig = statementCountPlugin.configs.strict as PluginConfig;
+
+        expect(strictConfig.rules['statement-count/function-statement-count']).toEqual([
+          'error',
+          { warnThreshold: 15, errorThreshold: 25 },
+        ]);
+        expect(strictConfig.rules['statement-count/class-statement-count']).toEqual([
+          'error',
+          { warnThreshold: 150, errorThreshold: 200 },
+        ]);
+      });
+
+      test('should validate strict function thresholds', () => {
+        if (!statementCountPlugin.configs) return;
+
+        const strictConfig = statementCountPlugin.configs.strict as PluginConfig;
+        const config = strictConfig.rules['statement-count/function-statement-count'];
+
+        expect(config).toEqual(['error', { warnThreshold: 15, errorThreshold: 25 }]);
+        expect((config[1] as { warnThreshold: number }).warnThreshold).toBe(15);
+        expect((config[1] as { errorThreshold: number }).errorThreshold).toBe(25);
+      });
+
+      test('should validate strict class thresholds', () => {
+        if (!statementCountPlugin.configs) return;
+
+        const strictConfig = statementCountPlugin.configs.strict as PluginConfig;
+        const config = strictConfig.rules['statement-count/class-statement-count'];
+
+        expect(config).toEqual(['error', { warnThreshold: 150, errorThreshold: 200 }]);
+        expect((config[1] as { warnThreshold: number }).warnThreshold).toBe(150);
+        expect((config[1] as { errorThreshold: number }).errorThreshold).toBe(200);
+      });
+    });
+
+    describe('plugin structure', () => {
+      test('should export both rules', () => {
+        expect(statementCountPlugin.rules).toHaveProperty('function-statement-count');
+        expect(statementCountPlugin.rules).toHaveProperty('class-statement-count');
+        expect(typeof statementCountPlugin.rules['function-statement-count']).toBe('object');
+        expect(typeof statementCountPlugin.rules['class-statement-count']).toBe('object');
+      });
+
+      test('should have both configuration presets', () => {
+        expect(statementCountPlugin.configs).toBeDefined();
+        if (!statementCountPlugin.configs) return;
+
+        expect(statementCountPlugin.configs).toHaveProperty('recommended');
+        expect(statementCountPlugin.configs).toHaveProperty('strict');
+        expect(typeof statementCountPlugin.configs.recommended).toBe('object');
+        expect(typeof statementCountPlugin.configs.strict).toBe('object');
+      });
+
+      test('should have proper rule metadata', () => {
+        const functionRule = statementCountPlugin.rules['function-statement-count'];
+        const classRule = statementCountPlugin.rules['class-statement-count'];
+
+        expect(functionRule.meta).toBeDefined();
+        if (functionRule.meta) {
+          expect(functionRule.meta.type).toBe('suggestion');
+          expect(functionRule.meta.docs).toBeDefined();
+          expect(functionRule.meta.schema).toBeDefined();
+          expect(functionRule.meta.messages).toBeDefined();
+        }
+
+        expect(classRule.meta).toBeDefined();
+        if (classRule.meta) {
+          expect(classRule.meta.type).toBe('suggestion');
+          expect(classRule.meta.docs).toBeDefined();
+          expect(classRule.meta.schema).toBeDefined();
+          expect(classRule.meta.messages).toBeDefined();
+        }
+      });
     });
   });
 });

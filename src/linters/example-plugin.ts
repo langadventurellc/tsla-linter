@@ -32,7 +32,7 @@ export const examplePlugin: ESLintPlugin = {
   configs: {
     recommended: {
       rules: {
-        'example/no-foo': 'error',
+        'example/no-foo': ['error', {}],
       },
     },
   },
