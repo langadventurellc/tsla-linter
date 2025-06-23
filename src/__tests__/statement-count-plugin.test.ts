@@ -314,7 +314,7 @@ describe('statement-count-plugin', () => {
                 messageId: 'tooManyStatements',
                 data: {
                   name: 'mixedStatements',
-                  count: '25',
+                  count: '28',
                   threshold: '25',
                   level: 'recommended max',
                 },
@@ -353,8 +353,457 @@ describe('statement-count-plugin', () => {
     });
   });
 
+  describe('class-statement-count rule', () => {
+    const classRule = statementCountPlugin.rules['class-statement-count'];
+
+    describe('with default configuration', () => {
+      ruleTester.run('class-statement-count (default)', classRule, {
+        valid: [
+          // Simple class with few methods
+          {
+            code: `class SmallClass {
+              constructor() {
+                this.value = 1;
+              }
+              
+              getValue() {
+                return this.value;
+              }
+              
+              setValue(newValue) {
+                this.value = newValue;
+              }
+            }`,
+          },
+          // Class with various method types but under threshold
+          {
+            code: `class MediumClass {
+              constructor(name) {
+                this.name = name;
+                this.items = [];
+              }
+              
+              static create(name) {
+                return new MediumClass(name);
+              }
+              
+              get itemCount() {
+                return this.items.length;
+              }
+              
+              set itemCount(value) {
+                if (value > 0) {
+                  this.items = new Array(value).fill(null);
+                }
+              }
+              
+              addItem(item) {
+                this.items.push(item);
+                return this.items.length;
+              }
+              
+              removeItem(index) {
+                if (index >= 0 && index < this.items.length) {
+                  return this.items.splice(index, 1)[0];
+                }
+                return null;
+              }
+            }`,
+          },
+          // Class expression with few methods
+          {
+            code: `const MyClass = class {
+              constructor() {
+                this.data = {};
+              }
+              
+              getData(key) {
+                return this.data[key];
+              }
+              
+              setData(key, value) {
+                this.data[key] = value;
+              }
+            };`,
+          },
+          // Empty class
+          {
+            code: 'class EmptyClass {}',
+          },
+        ],
+        invalid: [
+          // Class with many methods exceeding warn threshold (200)
+          {
+            code: `class LargeClass {
+              constructor() {
+                ${Array.from({ length: 50 }, (_, i) => `this.prop${i} = ${i};`).join('\n                ')}
+              }
+              
+              method1() {
+                ${Array.from({ length: 50 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+              
+              method2() {
+                ${Array.from({ length: 50 }, (_, i) => `this.value${i} = ${i};`).join('\n                ')}
+              }
+              
+              method3() {
+                ${Array.from({ length: 51 }, (_, i) => `const x${i} = ${i};`).join('\n                ')}
+              }
+            }`,
+            errors: [
+              {
+                messageId: 'tooManyStatements',
+                data: {
+                  name: 'LargeClass',
+                  count: '201',
+                  threshold: '200',
+                  level: 'recommended max',
+                },
+              },
+            ],
+          },
+          // Class exceeding error threshold (300)
+          {
+            code: `class HugeClass {
+              constructor() {
+                ${Array.from({ length: 100 }, (_, i) => `this.prop${i} = ${i};`).join('\n                ')}
+              }
+              
+              method1() {
+                ${Array.from({ length: 100 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+              
+              method2() {
+                ${Array.from({ length: 101 }, (_, i) => `this.value${i} = ${i};`).join('\n                ')}
+              }
+            }`,
+            errors: [
+              {
+                messageId: 'tooManyStatements',
+                data: {
+                  name: 'HugeClass',
+                  count: '301',
+                  threshold: '300',
+                  level: 'max',
+                },
+              },
+            ],
+          },
+          // Class expression with too many statements
+          {
+            code: `const BigClass = class {
+              constructor() {
+                ${Array.from({ length: 100 }, (_, i) => `this.prop${i} = ${i};`).join('\n                ')}
+              }
+              
+              method1() {
+                ${Array.from({ length: 101 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+            };`,
+            errors: [
+              {
+                messageId: 'tooManyStatements',
+                data: {
+                  name: 'BigClass',
+                  count: '201',
+                  threshold: '200',
+                  level: 'recommended max',
+                },
+              },
+            ],
+          },
+          // Anonymous class expression
+          {
+            code: `const obj = {
+              factory: class {
+                constructor() {
+                  ${Array.from({ length: 100 }, (_, i) => `this.prop${i} = ${i};`).join('\n                  ')}
+                }
+                
+                method1() {
+                  ${Array.from({ length: 101 }, (_, i) => `console.log(${i});`).join('\n                  ')}
+                }
+              }
+            };`,
+            errors: [
+              {
+                messageId: 'tooManyStatementsAnonymous',
+                data: {
+                  count: '201',
+                  threshold: '200',
+                  level: 'recommended max',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    describe('with custom configuration', () => {
+      ruleTester.run('class-statement-count (custom)', classRule, {
+        valid: [
+          // Class with 49 statements (below custom warn threshold)
+          {
+            code: `class SmallClass {
+              constructor() {
+                ${Array.from({ length: 24 }, (_, i) => `this.prop${i} = ${i};`).join('\n                ')}
+              }
+              
+              method1() {
+                ${Array.from({ length: 25 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+            }`,
+            options: [{ warnThreshold: 50, errorThreshold: 100 }],
+          },
+        ],
+        invalid: [
+          // Class with 50 statements (custom warn threshold)
+          {
+            code: `class WarnClass {
+              constructor() {
+                ${Array.from({ length: 25 }, (_, i) => `this.prop${i} = ${i};`).join('\n                ')}
+              }
+              
+              method1() {
+                ${Array.from({ length: 25 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+            }`,
+            options: [{ warnThreshold: 50, errorThreshold: 100 }],
+            errors: [
+              {
+                messageId: 'tooManyStatements',
+                data: {
+                  name: 'WarnClass',
+                  count: '50',
+                  threshold: '50',
+                  level: 'recommended max',
+                },
+              },
+            ],
+          },
+          // Class with 100 statements (custom error threshold)
+          {
+            code: `class ErrorClass {
+              constructor() {
+                ${Array.from({ length: 50 }, (_, i) => `this.prop${i} = ${i};`).join('\n                ')}
+              }
+              
+              method1() {
+                ${Array.from({ length: 50 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+            }`,
+            options: [{ warnThreshold: 50, errorThreshold: 100 }],
+            errors: [
+              {
+                messageId: 'tooManyStatements',
+                data: {
+                  name: 'ErrorClass',
+                  count: '100',
+                  threshold: '100',
+                  level: 'max',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    describe('various class constructs', () => {
+      ruleTester.run('class-statement-count (constructs)', classRule, {
+        valid: [
+          // Class with all types of methods
+          {
+            code: `class ComplexClass {
+              constructor(name) {
+                this.name = name;
+                this.data = new Map();
+              }
+              
+              static createEmpty() {
+                return new ComplexClass('empty');
+              }
+              
+              static validateName(name) {
+                return typeof name === 'string' && name.length > 0;
+              }
+              
+              get name() {
+                return this._name;
+              }
+              
+              set name(value) {
+                if (ComplexClass.validateName(value)) {
+                  this._name = value;
+                }
+              }
+              
+              getData(key) {
+                return this.data.get(key);
+              }
+              
+              setData(key, value) {
+                this.data.set(key, value);
+                return this;
+              }
+              
+              async loadData() {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                this.data = new Map(Object.entries(data));
+              }
+              
+              *iterateData() {
+                for (const [key, value] of this.data) {
+                  yield { key, value };
+                }
+              }
+            }`,
+          },
+        ],
+        invalid: [
+          // Same class but with more statements to trigger warning
+          {
+            code: `class ComplexClass {
+              constructor(name) {
+                this.name = name;
+                this.data = new Map();
+                ${Array.from({ length: 95 }, (_, i) => `this.extra${i} = ${i};`).join('\n                ')}
+              }
+              
+              static createEmpty() {
+                return new ComplexClass('empty');
+              }
+              
+              static validateName(name) {
+                return typeof name === 'string' && name.length > 0;
+              }
+              
+              get name() {
+                return this._name;
+              }
+              
+              set name(value) {
+                if (ComplexClass.validateName(value)) {
+                  this._name = value;
+                }
+              }
+              
+              getData(key) {
+                return this.data.get(key);
+              }
+              
+              setData(key, value) {
+                this.data.set(key, value);
+                return this;
+              }
+              
+              async loadData() {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                this.data = new Map(Object.entries(data));
+                ${Array.from({ length: 95 }, (_, i) => `console.log(${i});`).join('\n                ')}
+              }
+              
+              *iterateData() {
+                for (const [key, value] of this.data) {
+                  yield { key, value };
+                }
+                ${Array.from({ length: 95 }, (_, i) => `const temp${i} = ${i};`).join('\n                ')}
+              }
+            }`,
+            errors: [
+              {
+                messageId: 'tooManyStatements',
+                data: {
+                  name: 'ComplexClass',
+                  count: '300',
+                  threshold: '300',
+                  level: 'max',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    describe('edge cases', () => {
+      ruleTester.run('class-statement-count (edge cases)', classRule, {
+        valid: [
+          // Empty class
+          {
+            code: 'class Empty {}',
+          },
+          // Class with only empty methods
+          {
+            code: `class EmptyMethods {
+              constructor() {}
+              method1() {}
+              method2() {}
+              static staticMethod() {}
+              get value() { return undefined; }
+              set value(v) {}
+            }`,
+          },
+          // Class with nested classes (nested statements shouldn't count)
+          {
+            code: `class OuterClass {
+              constructor() {
+                this.value = 1;
+              }
+              
+              createInner() {
+                class InnerClass {
+                  constructor() {
+                    ${Array.from({ length: 50 }, (_, i) => `this.prop${i} = ${i};`).join('\n                    ')}
+                  }
+                  
+                  method() {
+                    ${Array.from({ length: 50 }, (_, i) => `console.log(${i});`).join('\n                    ')}
+                  }
+                }
+                return new InnerClass();
+              }
+            }`,
+          },
+          // Class with inheritance
+          {
+            code: `class BaseClass {
+              constructor(name) {
+                this.name = name;
+              }
+              
+              getName() {
+                return this.name;
+              }
+            }
+            
+            class DerivedClass extends BaseClass {
+              constructor(name, value) {
+                super(name);
+                this.value = value;
+              }
+              
+              getValue() {
+                return this.value;
+              }
+              
+              getFullInfo() {
+                return \`\${this.getName()}: \${this.getValue()}\`;
+              }
+            }`,
+          },
+        ],
+        invalid: [],
+      });
+    });
+  });
+
   describe('configuration validation', () => {
-    it('should throw error when warnThreshold >= errorThreshold', () => {
+    it('should throw error when warnThreshold >= errorThreshold for function rule', () => {
       expect(() => {
         const mockContext = {
           options: [{ warnThreshold: 30, errorThreshold: 30 }],
@@ -371,6 +820,28 @@ describe('statement-count-plugin', () => {
           report: jest.fn(),
         };
         statementCountPlugin.rules['function-statement-count'].create(
+          mockContext as unknown as Rule.RuleContext,
+        );
+      }).toThrow('warnThreshold must be less than errorThreshold');
+    });
+
+    it('should throw error when warnThreshold >= errorThreshold for class rule', () => {
+      expect(() => {
+        const mockContext = {
+          options: [{ warnThreshold: 250, errorThreshold: 250 }],
+          report: jest.fn(),
+        };
+        statementCountPlugin.rules['class-statement-count'].create(
+          mockContext as unknown as Rule.RuleContext,
+        );
+      }).toThrow('warnThreshold must be less than errorThreshold');
+
+      expect(() => {
+        const mockContext = {
+          options: [{ warnThreshold: 300, errorThreshold: 200 }],
+          report: jest.fn(),
+        };
+        statementCountPlugin.rules['class-statement-count'].create(
           mockContext as unknown as Rule.RuleContext,
         );
       }).toThrow('warnThreshold must be less than errorThreshold');

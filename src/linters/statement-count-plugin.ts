@@ -1,7 +1,7 @@
 import { Rule } from 'eslint';
 import * as ESTree from 'estree';
 import { ESLintPlugin } from '../types';
-import { countStatementsInFunction } from '../utils/statement-counter';
+import { countStatementsInFunction, countStatementsInClass } from '../utils/statement-counter';
 
 interface FunctionStatementCountOptions {
   warnThreshold?: number;
@@ -134,9 +134,119 @@ const functionStatementCountRule: Rule.RuleModule = {
   },
 };
 
+interface ClassStatementCountOptions {
+  warnThreshold?: number;
+  errorThreshold?: number;
+}
+
+const classStatementCountRule: Rule.RuleModule = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description: 'Enforce a maximum number of statements in classes',
+      recommended: false,
+    },
+    fixable: undefined,
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          warnThreshold: {
+            type: 'integer',
+            minimum: 1,
+          },
+          errorThreshold: {
+            type: 'integer',
+            minimum: 1,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
+    messages: {
+      tooManyStatements:
+        'Class "{{name}}" has {{count}} statements ({{threshold}} {{level}}). Consider breaking it down into smaller classes or extracting methods.',
+      tooManyStatementsAnonymous:
+        'Anonymous class has {{count}} statements ({{threshold}} {{level}}). Consider breaking it down into smaller classes or extracting methods.',
+    },
+  },
+  create(context) {
+    const options: ClassStatementCountOptions = context.options[0] || {};
+    const warnThreshold = options.warnThreshold || 200;
+    const errorThreshold = options.errorThreshold || 300;
+
+    // Validate configuration
+    if (warnThreshold >= errorThreshold) {
+      throw new Error('warnThreshold must be less than errorThreshold');
+    }
+
+    function checkClass(node: ESTree.ClassDeclaration | ESTree.ClassExpression): void {
+      const className = getClassName(node);
+      const result = countStatementsInClass(node, className || undefined);
+      const count = result.count;
+
+      let threshold: number;
+      let level: 'warning' | 'error';
+
+      if (count >= errorThreshold) {
+        threshold = errorThreshold;
+        level = 'error';
+      } else if (count >= warnThreshold) {
+        threshold = warnThreshold;
+        level = 'warning';
+      } else {
+        return;
+      }
+
+      const messageId = className ? 'tooManyStatements' : 'tooManyStatementsAnonymous';
+
+      context.report({
+        node,
+        messageId,
+        data: {
+          name: className || '',
+          count: count.toString(),
+          threshold: threshold.toString(),
+          level: level === 'error' ? 'max' : 'recommended max',
+        },
+      });
+    }
+
+    function getClassName(node: ESTree.ClassDeclaration | ESTree.ClassExpression): string | null {
+      // Class declaration
+      if (node.type === 'ClassDeclaration' && node.id) {
+        return node.id.name;
+      }
+
+      // Class expression assigned to variable
+      if (node.type === 'ClassExpression') {
+        const parent = (node as unknown as { parent?: ESTree.Node }).parent;
+        if (parent) {
+          if (parent.type === 'VariableDeclarator' && parent.id.type === 'Identifier') {
+            return parent.id.name;
+          }
+          if (parent.type === 'AssignmentExpression' && parent.left.type === 'Identifier') {
+            return parent.left.name;
+          }
+          // Don't treat class expressions in object properties as named
+          // They should be considered anonymous
+        }
+      }
+
+      return null;
+    }
+
+    return {
+      ClassDeclaration: checkClass,
+      ClassExpression: checkClass,
+    };
+  },
+};
+
 export const statementCountPlugin: ESLintPlugin = {
   rules: {
     'function-statement-count': functionStatementCountRule,
+    'class-statement-count': classStatementCountRule,
   },
   configs: {
     recommended: {
@@ -145,6 +255,10 @@ export const statementCountPlugin: ESLintPlugin = {
           'warn',
           { warnThreshold: 25, errorThreshold: 50 },
         ],
+        'statement-count/class-statement-count': [
+          'warn',
+          { warnThreshold: 200, errorThreshold: 300 },
+        ],
       },
     },
     strict: {
@@ -152,6 +266,10 @@ export const statementCountPlugin: ESLintPlugin = {
         'statement-count/function-statement-count': [
           'error',
           { warnThreshold: 15, errorThreshold: 25 },
+        ],
+        'statement-count/class-statement-count': [
+          'error',
+          { warnThreshold: 150, errorThreshold: 200 },
         ],
       },
     },

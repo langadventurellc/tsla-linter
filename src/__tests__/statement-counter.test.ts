@@ -64,7 +64,7 @@ describe('StatementCounter', () => {
   });
 
   describe('Excluded Statements', () => {
-    test('does not count variable declarations', () => {
+    test('does not count variable declarations without init', () => {
       const functionBody = createMockNode('BlockStatement', [
         createMockNode('VariableDeclaration'),
         createMockNode('VariableDeclaration'),
@@ -204,7 +204,7 @@ describe('StatementCounter', () => {
       ]);
 
       const result = counter.countStatements(functionBody);
-      expect(result.count).toBe(1); // Only the expression statement call
+      expect(result.count).toBe(2); // Variable declaration with init + expression statement
     });
   });
 

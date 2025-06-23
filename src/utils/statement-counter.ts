@@ -63,7 +63,17 @@ export class StatementCounter {
       'DebuggerStatement',
     ]);
 
-    return executableTypes.has(node.type);
+    if (executableTypes.has(node.type)) {
+      return true;
+    }
+
+    // Count variable declarations only if they have initializations
+    if (node.type === 'VariableDeclaration') {
+      const varDecl = node as unknown as { declarations: Array<{ init: unknown }> };
+      return varDecl.declarations && varDecl.declarations.some((decl) => decl.init !== null);
+    }
+
+    return false;
   }
 
   private shouldTraverseChildren(node: ESTree.Node): boolean {

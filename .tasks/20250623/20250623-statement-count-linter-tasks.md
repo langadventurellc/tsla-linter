@@ -151,18 +151,32 @@ sequenceDiagram
   - All tests pass (21 tests) with comprehensive coverage of functionality and edge cases
   - Meets all quality standards (lint, format, build, test all successful)
 
-- [ ] 3.0 Implement Class Statement Count Rule
-  - [ ] 3.1 Create rule structure for class declarations and expressions
-  - [ ] 3.2 Implement AST visitors to traverse class methods and count statements
-  - [ ] 3.3 Handle class-specific constructs (constructors, static methods, getters/setters)
-  - [ ] 3.4 Integrate with statement counting utility and threshold validation
-  - [ ] 3.5 Implement detailed error reporting for class violations
-  - [ ] 3.6 Add configuration schema and validation
-  - [ ] 3.7 Write comprehensive test suite for all class scenarios
-  - [ ] 3.8 Test edge cases like empty classes and complex inheritance
+- [x] 3.0 Implement Class Statement Count Rule
+  - [x] 3.1 Create rule structure for class declarations and expressions
+  - [x] 3.2 Implement AST visitors to traverse class methods and count statements
+  - [x] 3.3 Handle class-specific constructs (constructors, static methods, getters/setters)
+  - [x] 3.4 Integrate with statement counting utility and threshold validation
+  - [x] 3.5 Implement detailed error reporting for class violations
+  - [x] 3.6 Add configuration schema and validation
+  - [x] 3.7 Write comprehensive test suite for all class scenarios
+  - [x] 3.8 Test edge cases like empty classes and complex inheritance
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/statement-count-plugin.ts` - Added complete class statement count rule with AST visitors for ClassDeclaration and ClassExpression, configurable warn/error thresholds (defaults: warn=200, error=300), intelligent class name detection, detailed error messages, and integration with existing plugin structure including recommended and strict configuration presets
+  - `src/utils/statement-counter.ts` - Enhanced statement counting logic to properly handle variable declarations with initializations as executable statements while excluding bare variable declarations, ensuring accurate statement counting for class methods
+  - `src/__tests__/statement-count-plugin.test.ts` - Added comprehensive test suite for class statement count rule with 23 new tests covering default/custom configurations, all class constructs (constructors, static methods, getters/setters, async/generator methods), edge cases (empty classes, nested classes, inheritance), anonymous class expressions, and configuration validation
+
+  **Implementation Summary:**
+  - Created complete class statement count ESLint rule following established plugin patterns
+  - Implemented AST visitors for both ClassDeclaration and ClassExpression nodes
+  - Added intelligent class name detection that properly handles anonymous classes
+  - Integrated with existing countStatementsInClass utility for accurate statement counting
+  - Added configurable thresholds with validation (default warn=200, error=300, strict warn=150, error=200)
+  - Created detailed error messages distinguishing between named and anonymous classes
+  - Enhanced statement counting logic to properly count initialized variable declarations (e.g., `const x = 1;`) while excluding bare declarations (e.g., `let y;`)
+  - Added comprehensive test coverage with 23 tests covering all class scenarios and edge cases
+  - Updated existing tests to account for improved statement counting accuracy
+  - All quality checks pass (lint, format, test, build all successful)
 
 - [ ] 4.0 Create Main Plugin Module
   - [ ] 4.1 Create main plugin file exporting both rules
@@ -190,6 +204,7 @@ sequenceDiagram
   - [ ] 6.3 Validate TypeScript support with sample TypeScript files
   - [ ] 6.4 Test configuration edge cases and error handling
   - [ ] 6.5 Ensure all quality checks pass (lint, format, build, test)
+  - [ ] 6.6 Update README with usage instructions and examples
 
   ### Files modified with description of changes
   - (to be filled in after task completion)
