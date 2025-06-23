@@ -1,5 +1,5 @@
 import { Rule } from 'eslint';
-import { ESLintPlugin } from '../types';
+import { ESLintPlugin } from '../../types';
 
 const exampleRule: Rule.RuleModule = {
   meta: {
@@ -32,7 +32,7 @@ export const examplePlugin: ESLintPlugin = {
   configs: {
     recommended: {
       rules: {
-        'example/no-foo': 'error',
+        'example/no-foo': ['error', {}],
       },
     },
   },
