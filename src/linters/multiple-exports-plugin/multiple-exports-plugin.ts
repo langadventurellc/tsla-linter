@@ -62,7 +62,7 @@ const multipleExportsRule: Rule.RuleModule = {
       multipleExports:
         'Multiple exports found in file. Consider splitting into separate files or using a barrel file pattern.',
       multipleExportsDetailed:
-        'Multiple exports found: {{exportTypes}}. Consider splitting into separate files.',
+        'Multiple exports found: {{exportTypes}}. Consider splitting into separate files, each exporting a single item, or create a barrel file (index.ts) if these are related exports.',
     },
   },
   create(context) {

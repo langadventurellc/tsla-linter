@@ -122,15 +122,15 @@ sequenceDiagram
   - `src/__tests__/multiple-exports-plugin/export-detector.test.ts` - Added comprehensive tests for all new utility functions including export counting, classification, and TypeScript support; enhanced coverage for configuration options and edge cases
   - `src/__tests__/multiple-exports-plugin/multiple-exports-plugin.test.ts` - Updated existing tests to match enhanced error message format; added new test scenarios for TypeScript constructs and configuration filtering; improved test coverage for barrel file exemption and mixed export scenarios
 
-- [ ] 3.0 **Rule Logic and Violation Detection**
-  - [ ] 3.1 Implement main rule logic with context.report() for violations
-  - [ ] 3.2 Create clear error messages with export details and suggestions
-  - [ ] 3.3 Add support for both warning and error severity levels
-  - [ ] 3.4 Implement rule configuration validation and error handling
-  - [ ] 3.5 Write tests for rule logic, error messages, and configuration scenarios
+- [x] 3.0 **Rule Logic and Violation Detection**
+  - [x] 3.1 Implement main rule logic with context.report() for violations
+  - [x] 3.2 Create clear error messages with export details and suggestions
+  - [x] 3.3 Add support for both warning and error severity levels
+  - [x] 3.4 Implement rule configuration validation and error handling
+  - [x] 3.5 Write tests for rule logic, error messages, and configuration scenarios
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/multiple-exports-plugin/multiple-exports-plugin.ts` - Enhanced error messages to provide more specific and actionable suggestions for developers when multiple exports are detected, including guidance on splitting files or creating barrel files
 
 - [ ] 4.0 **Integration and Configuration**
   - [ ] 4.1 Add plugin export to main index.ts file
