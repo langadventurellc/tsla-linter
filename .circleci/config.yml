@@ -1,0 +1,63 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@7.1.0
+
+jobs:
+  test:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - node/install-packages
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Run tests
+          command: npm run test
+      - store_test_results:
+          path: .reports/jest-junit.xml
+      - run:
+          name: Build app
+          command: npm run build
+
+  lint:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - node/install-packages
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Run ESLint
+          command: npm run lint
+      - run:
+          name: Check Prettier formatting
+          command: npm run format:check
+
+workflows:
+  build-test-and-lint:
+    when:
+      and:
+        - not:
+            equal: [force-deploy, << pipeline.parameters.action >>]
+        - not:
+            equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - test:
+          context:
+            - web-env-qa
+      - lint:
+          context:
+            - web-env-qa
