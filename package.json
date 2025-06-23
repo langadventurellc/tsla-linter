@@ -1,5 +1,5 @@
 {
-  "name": "tsla-linter",
+  "name": "@langadventurellc/tsla-linter",
   "version": "0.1.0",
   "description": "A collection of custom ESLint plugins",
   "main": "dist/index.js",
@@ -39,6 +39,10 @@
     "url": "https://github.com/langadventurellc/tsla-linter/issues"
   },
   "homepage": "https://github.com/langadventurellc/tsla-linter#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "devDependencies": {
     "@types/eslint": "^9.6.1",
     "@types/jest": "^30.0.0",
