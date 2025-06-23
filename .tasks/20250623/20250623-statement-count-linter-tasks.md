@@ -200,15 +200,25 @@ sequenceDiagram
   - All quality checks pass (lint, format, test, build all successful)
   - Plugin is ready for export and integration into the main project
 
-- [ ] 5.0 Update Project Exports and Integration
-  - [ ] 5.1 Update main index.ts to export new plugin
-  - [ ] 5.2 Update types.ts if needed for new interfaces
-  - [ ] 5.3 Verify TypeScript compilation and build process
-  - [ ] 5.4 Run full test suite to ensure no regressions
-  - [ ] 5.5 Run linting and formatting tools to ensure code quality
+- [x] 5.0 Update Project Exports and Integration
+  - [x] 5.1 Update main index.ts to export new plugin
+  - [x] 5.2 Update types.ts if needed for new interfaces
+  - [x] 5.3 Verify TypeScript compilation and build process
+  - [x] 5.4 Run full test suite to ensure no regressions
+  - [x] 5.5 Run linting and formatting tools to ensure code quality
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/index.ts` - Added export for statementCountPlugin to make the statement count ESLint plugin available for external use
+
+  **Implementation Summary:**
+  - Successfully integrated the statement count plugin into the main project exports
+  - Added statementCountPlugin export to src/index.ts alongside existing examplePlugin
+  - Verified that existing types.ts interfaces (ESLintPlugin, PluginConfig) are sufficient for the new plugin
+  - Internal plugin interfaces (FunctionStatementCountOptions, ClassStatementCountOptions) remain private as configuration-only types
+  - Confirmed TypeScript compilation passes without errors
+  - All 68 tests pass across 3 test suites with no regressions
+  - Code formatting and linting standards maintained (all quality checks pass)
+  - Plugin is now ready for external consumption with both function and class statement count rules available
 
 - [ ] 6.0 Quality Assurance and Validation
   - [ ] 6.1 Run comprehensive test suite with coverage validation
