@@ -1,7 +1,7 @@
 import { Rule } from 'eslint';
 import * as ESTree from 'estree';
-import { ESLintPlugin } from '../types';
-import { countStatementsInFunction, countStatementsInClass } from '../utils/statement-counter';
+import { ESLintPlugin } from '../../types';
+import { countStatementsInClass, countStatementsInFunction } from './statement-counter';
 
 interface FunctionStatementCountOptions {
   warnThreshold?: number;

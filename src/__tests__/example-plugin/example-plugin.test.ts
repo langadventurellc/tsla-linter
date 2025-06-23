@@ -1,5 +1,5 @@
 import { RuleTester } from 'eslint';
-import { examplePlugin } from '../linters/example-plugin';
+import { examplePlugin } from '../../linters/example-plugin/example-plugin';
 
 const ruleTester = new RuleTester({
   languageOptions: {

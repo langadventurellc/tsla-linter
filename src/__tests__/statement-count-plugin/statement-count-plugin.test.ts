@@ -1,6 +1,6 @@
-import { RuleTester, Rule } from 'eslint';
-import { statementCountPlugin } from '../linters/statement-count-plugin';
-import { PluginConfig } from '../types';
+import { Rule, RuleTester } from 'eslint';
+import { statementCountPlugin } from '../../linters/statement-count-plugin/statement-count-plugin';
+import { PluginConfig } from '../../types';
 
 const ruleTester = new RuleTester({
   languageOptions: {

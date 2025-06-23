@@ -1,9 +1,9 @@
 import * as ESTree from 'estree';
 import {
   StatementCounter,
-  countStatementsInFunction,
   countStatementsInClass,
-} from '../utils/statement-counter';
+  countStatementsInFunction,
+} from '../../linters/statement-count-plugin/statement-counter';
 
 describe('StatementCounter', () => {
   let counter: StatementCounter;

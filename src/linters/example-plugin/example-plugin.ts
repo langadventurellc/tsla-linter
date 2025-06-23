@@ -1,5 +1,5 @@
 import { Rule } from 'eslint';
-import { ESLintPlugin } from '../types';
+import { ESLintPlugin } from '../../types';
 
 const exampleRule: Rule.RuleModule = {
   meta: {
