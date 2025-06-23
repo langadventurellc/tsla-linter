@@ -1,0 +1,53 @@
+name: Publish Package to GitHub Packages
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@langadventurellc'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run quality checks
+        run: |
+          npm run lint
+          npm run format
+          npm test
+          npm run build
+
+      - name: Determine version
+        id: version
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if [ "${{ github.ref_name }}" != "main" ]; then
+            # For non-main branches, append branch name and timestamp
+            BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            PUBLISH_VERSION="${PACKAGE_VERSION}-${BRANCH_NAME}.${TIMESTAMP}"
+            echo "Publishing prerelease version: $PUBLISH_VERSION"
+            npm version $PUBLISH_VERSION --no-git-tag-version
+          else
+            echo "Publishing release version: $PACKAGE_VERSION"
+          fi
+          echo "version=$PUBLISH_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
