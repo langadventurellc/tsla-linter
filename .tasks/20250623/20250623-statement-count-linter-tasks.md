@@ -89,11 +89,11 @@ sequenceDiagram
 
 ## Relevant Files
 
-- `src/linters/statement-count-plugin.ts` - Main plugin with both rules (pending)
+- `src/linters/statement-count-plugin.ts` - ✅ Main plugin with function statement count rule
 - `src/utils/statement-counter.ts` - ✅ Utility for counting executable statements
 - `src/types.ts` - Updated to include new plugin exports (pending)
 - `src/index.ts` - Updated to export new plugin (pending)
-- `src/__tests__/statement-count-plugin.test.ts` - Comprehensive test suite (pending)
+- `src/__tests__/statement-count-plugin.test.ts` - ✅ Comprehensive test suite for function statement count rule
 - `src/__tests__/statement-counter.test.ts` - ✅ Statement counter utility test suite
 
 ## Implementation Notes
@@ -127,17 +127,29 @@ sequenceDiagram
   - All tests pass with 100% coverage of implemented functionality
   - Meets all quality standards (lint, format, build successful)
 
-- [ ] 2.0 Implement Function Statement Count Rule
-  - [ ] 2.1 Create rule structure following existing plugin pattern
-  - [ ] 2.2 Implement AST visitors for function declarations, expressions, and arrow functions
-  - [ ] 2.3 Integrate statement counting utility with threshold validation
-  - [ ] 2.4 Implement detailed error message generation with location info
-  - [ ] 2.5 Add configuration schema and validation
-  - [ ] 2.6 Write comprehensive test suite for all function types
-  - [ ] 2.7 Test configuration handling and error scenarios
+- [x] 2.0 Implement Function Statement Count Rule
+  - [x] 2.1 Create rule structure following existing plugin pattern
+  - [x] 2.2 Implement AST visitors for function declarations, expressions, and arrow functions
+  - [x] 2.3 Integrate statement counting utility with threshold validation
+  - [x] 2.4 Implement detailed error message generation with location info
+  - [x] 2.5 Add configuration schema and validation
+  - [x] 2.6 Write comprehensive test suite for all function types
+  - [x] 2.7 Test configuration handling and error scenarios
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/statement-count-plugin.ts` - Created complete ESLint plugin with function statement count rule supporting configurable warn/error thresholds, AST visitors for all function types, detailed error messages with function names, and comprehensive configuration validation
+  - `src/__tests__/statement-count-plugin.test.ts` - Created comprehensive test suite with 21 tests covering default/custom configurations, all function types (declarations, expressions, arrow functions), various statement types, edge cases, and configuration validation
+
+  **Implementation Summary:**
+  - Created complete function statement count ESLint rule following existing plugin patterns
+  - Implemented AST visitors for FunctionDeclaration, FunctionExpression, and ArrowFunctionExpression
+  - Integrated with existing statement counter utility with proper type handling
+  - Added configurable warn/error thresholds with validation (defaults: warn=25, error=50)
+  - Implemented smart function name detection for better error messages
+  - Created detailed error messages distinguishing between named and anonymous functions
+  - Included recommended and strict configuration presets
+  - All tests pass (21 tests) with comprehensive coverage of functionality and edge cases
+  - Meets all quality standards (lint, format, build, test all successful)
 
 - [ ] 3.0 Implement Class Statement Count Rule
   - [ ] 3.1 Create rule structure for class declarations and expressions
