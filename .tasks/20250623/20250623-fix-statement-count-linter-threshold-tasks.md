@@ -109,15 +109,26 @@ sequenceDiagram
 
 ## Implementation Tasks
 
-- [ ] 1.0 Create New Rule Structure
-  - [ ] 1.1 Create four new rule modules replacing the existing combined rules
-  - [ ] 1.2 Implement single threshold configuration schema for each rule
-  - [ ] 1.3 Add configuration validation to ensure thresholds are positive integers
-  - [ ] 1.4 Update plugin exports to register four separate rules
-  - [ ] 1.5 Write unit tests for new rule structure and configuration validation
+- [x] 1.0 Create New Rule Structure
+  - [x] 1.1 Create four new rule modules replacing the existing combined rules
+  - [x] 1.2 Implement single threshold configuration schema for each rule
+  - [x] 1.3 Add configuration validation to ensure thresholds are positive integers
+  - [x] 1.4 Update plugin exports to register four separate rules
+  - [x] 1.5 Write unit tests for new rule structure and configuration validation
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/statement-count-plugin/statement-count-plugin.ts` - Complete rewrite to replace two combined rules with four separate rules:
+    - Replaced `function-statement-count` and `class-statement-count` with four new rules
+    - Added `function-statement-count-warn`, `function-statement-count-error`, `class-statement-count-warn`, `class-statement-count-error`
+    - Each rule now has single threshold configuration instead of dual warn/error thresholds
+    - Added proper input validation to ensure thresholds are positive integers
+    - Updated plugin exports and preset configurations to use new rule structure
+    - Moved shared helper functions (`getFunctionName`, `getClassName`) to module level for reuse
+  - `src/__tests__/statement-count-plugin/statement-count-plugin.test.ts` - Complete rewrite of test suite:
+    - Updated all tests to work with four separate rules instead of combined rules
+    - Added comprehensive test coverage for each rule's configuration validation
+    - Updated plugin configuration tests to verify new rule structure and presets
+    - Ensured all test scenarios properly validate single threshold configuration schema
 
 - [ ] 2.0 Implement Warning Rules Logic
   - [ ] 2.1 Create function-statement-count-warn rule using existing statement counting logic
