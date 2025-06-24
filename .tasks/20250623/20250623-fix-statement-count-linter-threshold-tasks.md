@@ -166,15 +166,21 @@ sequenceDiagram
     - Tests cover default and custom configurations, validation, and error scenarios
     - All 294 tests passing, confirming proper error rule functionality and 'error' severity level reporting
 
-- [ ] 4.0 Update Plugin Configuration Presets
-  - [ ] 4.1 Replace existing preset configurations with new four-rule structure
-  - [ ] 4.2 Update 'recommended' preset with appropriate warning and error thresholds
-  - [ ] 4.3 Update 'strict' preset with tighter warning and error thresholds
-  - [ ] 4.4 Add preset configuration tests to verify correct rule registration
-  - [ ] 4.5 Document breaking changes and new configuration patterns
+- [x] 4.0 Update Plugin Configuration Presets
+  - [x] 4.1 Replace existing preset configurations with new four-rule structure
+  - [x] 4.2 Update 'recommended' preset with appropriate warning and error thresholds
+  - [x] 4.3 Update 'strict' preset with tighter warning and error thresholds
+  - [x] 4.4 Add preset configuration tests to verify correct rule registration
+  - [x] 4.5 Document breaking changes and new configuration patterns
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `README.md` - Updated documentation to reflect breaking changes and new configuration patterns:
+    - Updated basic usage examples to show new four-rule structure instead of old combined rules
+    - Added comprehensive breaking change documentation with migration guide from v1.x to v2.x
+    - Updated Configuration Options section with new single threshold configuration format
+    - Updated Available Rules section to document four separate rules with their individual defaults and severity levels
+    - Updated Configuration Presets section to clarify that presets configure all four rules automatically
+    - Added TypeScript usage examples with new rule names
 
 - [ ] 5.0 Integration Testing and Validation
   - [ ] 5.1 Create integration tests that verify ESLint actually reports warnings vs errors
