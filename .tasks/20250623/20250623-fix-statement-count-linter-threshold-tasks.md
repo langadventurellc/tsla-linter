@@ -130,15 +130,23 @@ sequenceDiagram
     - Updated plugin configuration tests to verify new rule structure and presets
     - Ensured all test scenarios properly validate single threshold configuration schema
 
-- [ ] 2.0 Implement Warning Rules Logic
-  - [ ] 2.1 Create function-statement-count-warn rule using existing statement counting logic
-  - [ ] 2.2 Create class-statement-count-warn rule using existing statement counting logic
-  - [ ] 2.3 Implement proper warning threshold checking and reporting
-  - [ ] 2.4 Add comprehensive test coverage for warning rule scenarios
-  - [ ] 2.5 Verify warning rules report with 'warn' severity level
+- [x] 2.0 Implement Warning Rules Logic
+  - [x] 2.1 Create function-statement-count-warn rule using existing statement counting logic
+  - [x] 2.2 Create class-statement-count-warn rule using existing statement counting logic
+  - [x] 2.3 Implement proper warning threshold checking and reporting
+  - [x] 2.4 Add comprehensive test coverage for warning rule scenarios
+  - [x] 2.5 Verify warning rules report with 'warn' severity level
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/statement-count-plugin/statement-count-plugin.ts` - Warning rules already implemented:
+    - `functionStatementCountWarnRule` (lines 11-76) uses existing statement counting logic with proper threshold checking
+    - `classStatementCountWarnRule` (lines 147-207) uses existing statement counting logic with proper threshold checking
+    - Both rules configured with default thresholds (25 for functions, 200 for classes) and proper message reporting
+    - Plugin exports include warning rules with 'warn' severity level configuration
+  - `src/__tests__/statement-count-plugin/statement-count-plugin.test.ts` - Comprehensive test coverage already exists:
+    - Complete test suites for both function-statement-count-warn (lines 13-121) and class-statement-count-warn (lines 201-313)
+    - Tests cover default and custom configurations, validation, named and anonymous scenarios
+    - All 294 tests passing, confirming proper warning rule functionality
 
 - [ ] 3.0 Implement Error Rules Logic
   - [ ] 3.1 Create function-statement-count-error rule using existing statement counting logic
