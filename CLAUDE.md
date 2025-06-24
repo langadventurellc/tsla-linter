@@ -24,7 +24,7 @@ A collection of ESLint plugins for custom linting tools.
 3. **Quality Pipeline**: Run before finishing every task:
 
    ```bash
-   npm run lint && npm run format && npm test && npm run build
+   npm run lint && npm run format && npm test && npm run build && npm run type-check
    ```
 
 4. **File Organization**:
@@ -58,6 +58,7 @@ npm run lint         # ESLint
 npm run lint:fix     # ESLint auto-fix
 npm run format       # Prettier
 npm test             # Jest tests
+npm run type-check   # TypeScript type checking
 ```
 
 ## Key Patterns
