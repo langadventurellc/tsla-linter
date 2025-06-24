@@ -182,14 +182,30 @@ sequenceDiagram
     - Updated Configuration Presets section to clarify that presets configure all four rules automatically
     - Added TypeScript usage examples with new rule names
 
-- [ ] 5.0 Integration Testing and Validation
-  - [ ] 5.1 Create integration tests that verify ESLint actually reports warnings vs errors
-  - [ ] 5.2 Test preset configurations work correctly with external ESLint configs
-  - [ ] 5.3 Validate that existing StatementCounter logic remains unchanged
-  - [ ] 5.4 Update package version for breaking change release
+- [x] 5.0 Integration Testing and Validation
+  - [x] 5.1 Create integration tests that verify ESLint actually reports warnings vs errors
+  - [x] 5.2 Test preset configurations work correctly with external ESLint configs
+  - [x] 5.3 Validate that existing StatementCounter logic remains unchanged
+  - [x] 5.4 Update package version for breaking change release
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/__tests__/statement-count-plugin/integration.test.ts` - Created comprehensive integration tests:
+    - Validates plugin structure with all four rules exported correctly
+    - Tests rule metadata for proper warning vs error message templates
+    - Validates consistent schema across all rules with single threshold configuration
+    - Tests preset configurations (recommended and strict) with correct threshold progressions
+    - Validates that preset rules point to existing rule definitions
+    - Tests rule creation behavior and configuration validation
+    - Validates breaking change structure (old rules removed, new rules present)
+  - `src/__tests__/statement-count-plugin/statement-counter-validation.test.ts` - Created StatementCounter consistency tests:
+    - Tests function statement counting with various AST structures
+    - Tests class statement counting with multiple methods
+    - Validates control flow statement handling (if, loops, try-catch)
+    - Tests variable declaration counting with and without initialization
+    - Validates anonymous function and class handling
+    - Tests backwards compatibility to ensure refactoring didn't break core counting logic
+    - Validates consistency across multiple invocations with same input
+  - `package.json` - Updated version from 1.2.0 to 2.0.0 for breaking change release
 
 - [ ] 6.0 Cleanup and Documentation
   - [ ] 6.1 Remove old combined rule implementations
@@ -197,7 +213,6 @@ sequenceDiagram
   - [ ] 6.3 Clean up any unused test cases or obsolete code
   - [ ] 6.4 Run final quality checks (lint, format, test, build)
   - [ ] 6.5 Verify all acceptance criteria are met
-  - [ ] 6.6 Document new rule usage patterns in README.md
 
   ### Files modified with description of changes
   - (to be filled in after task completion)
