@@ -38,8 +38,10 @@ module.exports = [
       'multiple-exports': multipleExportsPlugin,
     },
     rules: {
-      'statement-count/function-statement-count': 'warn',
-      'statement-count/class-statement-count': 'warn',
+      'statement-count/function-statement-count-warn': 'warn',
+      'statement-count/function-statement-count-error': 'error',
+      'statement-count/class-statement-count-warn': 'warn',
+      'statement-count/class-statement-count-error': 'error',
       'multiple-exports/no-multiple-exports': 'error',
     },
   },
@@ -50,20 +52,38 @@ module.exports = [
 
 #### Statement Count Plugin
 
-The Statement Count rules support configurable thresholds:
+The Statement Count rules support configurable thresholds. **Breaking Change**: The plugin now uses four separate rules instead of combined warning/error rules:
 
 ```javascript
-// Custom thresholds
+// New configuration format - each rule has a single threshold
+{
+  rules: {
+    'statement-count/function-statement-count-warn': ['warn', { threshold: 20 }],   // Default: 25
+    'statement-count/function-statement-count-error': ['error', { threshold: 40 }], // Default: 50
+    'statement-count/class-statement-count-warn': ['warn', { threshold: 150 }],     // Default: 200
+    'statement-count/class-statement-count-error': ['error', { threshold: 250 }]    // Default: 300
+  }
+}
+```
+
+**Migration from v1.x**: If you were using the old combined rules, update your configuration:
+
+```javascript
+// OLD (v1.x) - no longer supported
 {
   rules: {
     'statement-count/function-statement-count': ['error', {
-      warnThreshold: 20,    // Warning threshold (default: 25)
-      errorThreshold: 40    // Error threshold (default: 50)
-    }],
-    'statement-count/class-statement-count': ['error', {
-      warnThreshold: 150,   // Warning threshold (default: 200)
-      errorThreshold: 250   // Error threshold (default: 300)
+      warnThreshold: 20,
+      errorThreshold: 40
     }]
+  }
+}
+
+// NEW (v2.x) - use separate rules
+{
+  rules: {
+    'statement-count/function-statement-count-warn': ['warn', { threshold: 20 }],
+    'statement-count/function-statement-count-error': ['error', { threshold: 40 }]
   }
 }
 ```
@@ -166,8 +186,10 @@ module.exports = [
       'multiple-exports': multipleExportsPlugin,
     },
     rules: {
-      'statement-count/function-statement-count': 'warn',
-      'statement-count/class-statement-count': 'warn',
+      'statement-count/function-statement-count-warn': 'warn',
+      'statement-count/function-statement-count-error': 'error',
+      'statement-count/class-statement-count-warn': 'warn',
+      'statement-count/class-statement-count-error': 'error',
       'multiple-exports/no-multiple-exports': 'error',
     },
   },
@@ -178,14 +200,29 @@ module.exports = [
 
 ### Statement Count Plugin (`statementCountPlugin`)
 
-- **`statement-count/function-statement-count`**: Limits the number of executable statements in functions
-  - **Default**: Warning at 25 statements, error at 50 statements
-  - **Rationale**: Large functions are harder to understand, test, and maintain
+**Function Rules:**
+
+- **`statement-count/function-statement-count-warn`**: Warning threshold for function statement count
+  - **Default**: 25 statements
+  - **Severity**: Warning level
   - **Applies to**: Function declarations, function expressions, arrow functions
-- **`statement-count/class-statement-count`**: Limits the number of executable statements in classes
-  - **Default**: Warning at 200 statements, error at 300 statements
-  - **Rationale**: Large classes violate single responsibility principle
+- **`statement-count/function-statement-count-error`**: Error threshold for function statement count
+  - **Default**: 50 statements
+  - **Severity**: Error level
+  - **Applies to**: Function declarations, function expressions, arrow functions
+
+**Class Rules:**
+
+- **`statement-count/class-statement-count-warn`**: Warning threshold for class statement count
+  - **Default**: 200 statements
+  - **Severity**: Warning level
   - **Applies to**: Class declarations and class expressions
+- **`statement-count/class-statement-count-error`**: Error threshold for class statement count
+  - **Default**: 300 statements
+  - **Severity**: Error level
+  - **Applies to**: Class declarations and class expressions
+
+**Rationale**: Large functions and classes are harder to understand, test, and maintain. Large classes violate the single responsibility principle.
 
 ### What Counts as a Statement?
 
@@ -207,13 +244,19 @@ The plugin excludes:
 
 ### Configuration Presets
 
+The plugin provides two preset configurations that automatically configure all four rules:
+
 - **Recommended**: Balanced settings for most projects
-  - Functions: warn at 25, error at 50
-  - Classes: warn at 200, error at 300
+  - `function-statement-count-warn`: warn at 25 statements
+  - `function-statement-count-error`: error at 50 statements
+  - `class-statement-count-warn`: warn at 200 statements
+  - `class-statement-count-error`: error at 300 statements
 
 - **Strict**: Higher standards for critical codebases
-  - Functions: warn at 15, error at 25
-  - Classes: warn at 150, error at 200
+  - `function-statement-count-warn`: warn at 15 statements
+  - `function-statement-count-error`: error at 25 statements
+  - `class-statement-count-warn`: warn at 150 statements
+  - `class-statement-count-error`: error at 200 statements
 
 ### Multiple Exports Plugin (`multipleExportsPlugin`)
 

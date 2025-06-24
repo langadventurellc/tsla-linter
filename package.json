@@ -1,6 +1,6 @@
 {
   "name": "@langadventurellc/tsla-linter",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "A collection of custom ESLint plugins",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "prepublishOnly": "npm run clean && npm run build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
