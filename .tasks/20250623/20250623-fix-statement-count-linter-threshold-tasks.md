@@ -148,15 +148,23 @@ sequenceDiagram
     - Tests cover default and custom configurations, validation, named and anonymous scenarios
     - All 294 tests passing, confirming proper warning rule functionality
 
-- [ ] 3.0 Implement Error Rules Logic
-  - [ ] 3.1 Create function-statement-count-error rule using existing statement counting logic
-  - [ ] 3.2 Create class-statement-count-error rule using existing statement counting logic
-  - [ ] 3.3 Implement proper error threshold checking and reporting
-  - [ ] 3.4 Add comprehensive test coverage for error rule scenarios
-  - [ ] 3.5 Verify error rules report with 'error' severity level
+- [x] 3.0 Implement Error Rules Logic
+  - [x] 3.1 Create function-statement-count-error rule using existing statement counting logic
+  - [x] 3.2 Create class-statement-count-error rule using existing statement counting logic
+  - [x] 3.3 Implement proper error threshold checking and reporting
+  - [x] 3.4 Add comprehensive test coverage for error rule scenarios
+  - [x] 3.5 Verify error rules report with 'error' severity level
 
   ### Files modified with description of changes
-  - (to be filled in after task completion)
+  - `src/linters/statement-count-plugin/statement-count-plugin.ts` - Error rules already implemented:
+    - `functionStatementCountErrorRule` (lines 79-144) uses existing statement counting logic with proper threshold checking
+    - `classStatementCountErrorRule` (lines 210-270) uses existing statement counting logic with proper threshold checking
+    - Both rules configured with appropriate defaults (50 for functions, 300 for classes) and proper error message reporting
+    - Plugin exports include error rules with 'error' severity level configuration in presets
+  - `src/__tests__/statement-count-plugin/statement-count-plugin.test.ts` - Comprehensive test coverage already exists:
+    - Complete test suites for both function-statement-count-error (lines 123-199) and class-statement-count-error (lines 315-414)
+    - Tests cover default and custom configurations, validation, and error scenarios
+    - All 294 tests passing, confirming proper error rule functionality and 'error' severity level reporting
 
 - [ ] 4.0 Update Plugin Configuration Presets
   - [ ] 4.1 Replace existing preset configurations with new four-rule structure
