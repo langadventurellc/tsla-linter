@@ -1,16 +1,24 @@
-name: Publish Package to GitHub Packages
+name: Publish Package to NPM
 
 on:
-  push:
-    branches:
-      - '**'
+  workflow_dispatch:
+    inputs:
+      version-type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+  release:
+    types: [published]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -18,8 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@langadventurellc'
+          registry-url: 'https://registry.npmjs.org/'
 
       - name: Install dependencies
         run: npm ci
@@ -30,24 +37,17 @@ jobs:
           npm run format
           npm test
           npm run build
+          npm run type-check
 
-      - name: Determine version
-        id: version
+      - name: Bump version (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          if [ "${{ github.ref_name }}" != "main" ]; then
-            # For non-main branches, append branch name and timestamp
-            BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
-            TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            PUBLISH_VERSION="${PACKAGE_VERSION}-${BRANCH_NAME}.${TIMESTAMP}"
-            echo "Publishing prerelease version: $PUBLISH_VERSION"
-            npm version $PUBLISH_VERSION --no-git-tag-version
-          else
-            echo "Publishing release version: $PACKAGE_VERSION"
-          fi
-          echo "version=$PUBLISH_VERSION" >> $GITHUB_OUTPUT
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm version ${{ github.event.inputs.version-type }}
+          git push origin main --tags
 
-      - name: Publish to GitHub Packages
+      - name: Publish to NPM
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

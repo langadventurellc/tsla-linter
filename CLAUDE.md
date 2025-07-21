@@ -124,42 +124,69 @@ Write unit tests for all API endpoints and business logic. Use the `src/__tests_
 - If you cannot fix them, ask for help - **do not ignore them**
 - It does not matter if the code works or if the failures are unrelated to your changes: **DO NOT COMPLETE THE TASK UNTIL ALL QUALITY CHECKS PASS**
 
-## Third-Party Library Documentation
+---
 
-When working with third-party libraries, use the context7 MCP tool to get up-to-date documentation and examples. This ensures you have access to the latest API changes and best practices for libraries like FastAPI, Pydantic, LangChain, Firebase, Google Cloud services, and others used in this project.
+## Clean‑Code Charter
 
-## Asking Questions
+> **Purpose**  Guide large‑language‑model (LLM) coding agents toward the simplest **working** solution, written in the style of seasoned engineers (Kent Beck, Robert Martin, et al.).
+> The charter is language‑agnostic but assumes most code is authored in **Python**.
 
-- **Ask one question at a time**
-- **Provide options for each question**
+### 1  Guiding Maxims (agents must echo these before coding)
 
-_Example question_
+| Maxim                                  | Practical test                                                      |
+| -------------------------------------- | ------------------------------------------------------------------- |
+| **KISS** – _Keep It Super Simple_      | Could a junior dev explain the design to a peer in ≤ 2 min?         |
+| **YAGNI** – _You Aren’t Gonna Need It_ | Is the abstraction used < 3 times? If so, inline it.                |
+| **SRP / small units**                  | One concept per function; ≤ 20 logical LOC; cyclomatic ≤ 5.         |
+| **DRY** – _Don’t Repeat Yourself_      | Is the code repeated in ≥ 2 places? If so, extract it.              |
+| **Simplicity**                         | Is the code simpler than the alternative? If not, refactor it.      |
+| **Explicit is better than implicit**   | Is the code self‑documenting? If not, add comments.                 |
+| **Fail fast**                          | Does the code handle errors gracefully? If not, add error handling. |
 
-```
-In case of multiple variations, should metadata be generated for all variations or only the first one?
-- **Options:**
-  - A) Generate metadata for all variations
-  - B) Generate metadata only for the first variation
-  - C) Do not generate metadata at all
-```
+### 2  Architecture Heuristics
 
-**Remember to ask one question at a time and provide options for each question.**
+#### 2.1 File‑ & package‑level
 
-## Prohibited Actions
+- **≤ 400 LOC per file** (logical lines).
+- No **“util” or “helpers” dumping grounds** – every module owns a domain noun/verb.
 
-- ❌ Shared "kitchen-sink" modules
-- ❌ Hardcoded secrets (including file paths outside project root)
-- ❌ Scope expansion without approval
+#### 2.2 Module decomposition & dependency rules _(new)_
 
-<rules>
-  <critical>NEVER bypass git pre-commit hooks, unit tests or quality checks.</critical>
-  <critical>NEVER finish a task with failing unit tests or quality checks.</critical>
-  <critical>NEVER, NEVER commit code with failing unit tests or quality checks.</critical>
-  <critical>Write tests for new or modified functionality. Do not write tests for style or formatting.</critical>
-  <critical>Never hardcode secrets or environment values, including file paths outside project root.</critical>
-  <critical>Ensure all quality checks pass before marking a task complete. Do not proceed if any checks or tests fail.</critical>
-  <important>Each "public" class or function should be in its own file, unless otherwise approved.</important>
-  <important>Use context7 MCP tool to get up-to-date documentation and best practices for all third-party libraries.</important>
-  <important>Ask questions for implementation details, clarifications, or when requirements are ambiguous.</important>
-  <rule>Do not write comments for obvious code. Use meaningful variable and function names instead.</rule>
-</rules>
+1. **Domain‑oriented modules.** Each module encapsulates **one** coherent business concept (noun) or service (verb).
+2. **Explicit public surface.** Export `index.ts` only what callers need; everything else is private.
+3. **Acyclic dependency graph.** Imports must not form cycles; prefer dependency‑inversion interfaces to break loops.
+4. **Shallow import depth ≤ 3.** Deep chains signal hidden coupling.
+5. **Rule of three for new layers.** Add a new package level only after three modules share the same concern.
+6. **Composition over inheritance** unless ≥ 2 concrete subclasses are already required.
+7. **Ports & Adapters pattern** for I/O: keep domain logic free of external frameworks (DB, HTTP, UI).
+8. **Naming convention:** _package/module = noun_, _class = noun_, _function = verb + noun_.
+
+### 3  Testing Policy
+
+- **Goldilocks rule.** Exactly **one** happy‑path unit test per public function _unless_ complexity > 5.
+- **Integration tests only at seams.** Use fakes/mocks internally.
+- **Performance tests gated.** Only generate when the target class/function bears a `@PerfTest` attribute.
+
+### 4  Agent Self‑Review Checklist (before emitting code)
+
+1. Could this be **one function simpler**?
+2. Did I introduce an abstraction used **only once**?
+3. Did I write a **performance test without** a `@PerfTest` attribute?
+4. Can a junior dev grok each file in **< 5 min**?
+
+---
+
+## 🤔 When You’re Unsure
+
+1. **Stop** and ask a clear, single question.
+2. Offer options (A / B / C) if helpful.
+3. Wait for user guidance before proceeding.
+
+## Troubleshooting
+
+If you encounter issues:
+
+- Check the documentation in `docs/`
+- Use the context7 MCP tool for up-to-date library documentation
+- Use web for research (the current year is 2025)
+- If you need clarification, ask specific questions with options

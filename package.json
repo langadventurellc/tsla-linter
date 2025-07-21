@@ -42,8 +42,8 @@
   },
   "homepage": "https://github.com/langadventurellc/tsla-linter#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@types/eslint": "^9.6.1",
