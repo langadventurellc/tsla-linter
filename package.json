@@ -1,6 +1,6 @@
 {
   "name": "@langadventurellc/tsla-linter",
-  "version": "2.0.0",
+  "version": "0.0.0-development",
   "description": "A collection of custom ESLint plugins",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
