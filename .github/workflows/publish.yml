@@ -1,16 +1,13 @@
-name: Publish Package to GitHub Packages
+name: Publish Package to NPM
 
 on:
   push:
-    branches:
-      - '**'
+    tags:
+      - 'v*' # Matches v1.0.0, v2.1.0-beta.1, etc.
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -18,8 +15,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@langadventurellc'
+          registry-url: 'https://registry.npmjs.org/'
 
       - name: Install dependencies
         run: npm ci
@@ -30,24 +26,28 @@ jobs:
           npm run format
           npm test
           npm run build
+          npm run type-check
 
-      - name: Determine version
+      - name: Extract version from tag
         id: version
         run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          if [ "${{ github.ref_name }}" != "main" ]; then
-            # For non-main branches, append branch name and timestamp
-            BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
-            TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            PUBLISH_VERSION="${PACKAGE_VERSION}-${BRANCH_NAME}.${TIMESTAMP}"
-            echo "Publishing prerelease version: $PUBLISH_VERSION"
-            npm version $PUBLISH_VERSION --no-git-tag-version
-          else
-            echo "Publishing release version: $PACKAGE_VERSION"
-          fi
-          echo "version=$PUBLISH_VERSION" >> $GITHUB_OUTPUT
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Publish to GitHub Packages
-        run: npm publish
+          # Determine if this is a prerelease and set appropriate tag
+          if [[ "$TAG_VERSION" == *"-"* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "npm_tag=beta" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "npm_tag=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update package.json version
+        run: |
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Publish to NPM
+        run: npm publish --tag ${{ steps.version.outputs.npm_tag }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

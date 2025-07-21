@@ -1,6 +1,6 @@
 {
   "name": "@langadventurellc/tsla-linter",
-  "version": "2.0.0",
+  "version": "0.0.0-development",
   "description": "A collection of custom ESLint plugins",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,8 +42,8 @@
   },
   "homepage": "https://github.com/langadventurellc/tsla-linter#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@types/eslint": "^9.6.1",
@@ -52,12 +52,10 @@
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
     "eslint": "^9.29.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
     "prettier": "^3.6.0",
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "husky": "^9.1.7"
   }
 }

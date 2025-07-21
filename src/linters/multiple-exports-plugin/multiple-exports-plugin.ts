@@ -15,6 +15,7 @@ interface MultipleExportsOptions {
   checkInterfaces?: boolean;
   checkTypes?: boolean;
   checkVariables?: boolean;
+  excludeConstants?: boolean;
   ignoreBarrelFiles?: boolean;
 }
 
@@ -58,6 +59,11 @@ const multipleExportsRule: Rule.RuleModule = {
             default: true,
             description: 'Check for multiple variable/constant exports in a single file',
           },
+          excludeConstants: {
+            type: 'boolean',
+            default: false,
+            description: 'Exclude const declarations from multiple variable export checks',
+          },
           ignoreBarrelFiles: {
             type: 'boolean',
             default: true,
@@ -82,6 +88,7 @@ const multipleExportsRule: Rule.RuleModule = {
       checkInterfaces = true,
       checkTypes = true,
       checkVariables = true,
+      excludeConstants = false,
       ignoreBarrelFiles = true,
     } = options;
 
@@ -147,6 +154,7 @@ const multipleExportsRule: Rule.RuleModule = {
             checkInterfaces,
             checkTypes,
             checkVariables,
+            excludeConstants,
           });
 
           if (exportInfo) {
@@ -173,6 +181,7 @@ const multipleExportsRule: Rule.RuleModule = {
           checkInterfaces,
           checkTypes,
           checkVariables,
+          excludeConstants,
         });
 
         if (exportInfo) {
@@ -202,6 +211,7 @@ export const multipleExportsPlugin: ESLintPlugin = {
             checkInterfaces: true,
             checkTypes: true,
             checkVariables: true,
+            excludeConstants: false,
             ignoreBarrelFiles: true,
           },
         ],
@@ -217,6 +227,7 @@ export const multipleExportsPlugin: ESLintPlugin = {
             checkInterfaces: true,
             checkTypes: true,
             checkVariables: true,
+            excludeConstants: false,
             ignoreBarrelFiles: true,
           },
         ],

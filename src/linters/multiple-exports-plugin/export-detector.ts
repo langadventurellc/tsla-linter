@@ -32,6 +32,7 @@ export function detectExports(
     checkInterfaces?: boolean;
     checkTypes?: boolean;
     checkVariables?: boolean;
+    excludeConstants?: boolean;
   } = {},
 ): ExportInfo | null {
   const {
@@ -40,6 +41,7 @@ export function detectExports(
     checkInterfaces = true,
     checkTypes = true,
     checkVariables = true,
+    excludeConstants = false,
   } = options;
 
   if (node.type === 'ExportDefaultDeclaration') {
@@ -117,6 +119,12 @@ export function detectExports(
       }
 
       if (declaration.type === 'VariableDeclaration' && checkVariables) {
+        // Check if this is a const declaration and if we should exclude it
+        const isConstDeclaration = declaration.kind === 'const';
+        if (isConstDeclaration && excludeConstants) {
+          return null; // Skip const declarations when excludeConstants is true
+        }
+
         // Return the first variable declaration
         const firstDeclarator = declaration.declarations[0];
         if (firstDeclarator && firstDeclarator.id.type === 'Identifier') {
