@@ -104,12 +104,23 @@ The Multiple Exports rule can be configured to check specific export types:
 {
   rules: {
     'multiple-exports/no-multiple-exports': ['error', {
-      checkClasses: true,      // Check for multiple class exports (default: true)
-      checkFunctions: true,    // Check for multiple function exports (default: true)
-      checkInterfaces: true,   // Check for multiple interface exports (default: true)
-      checkTypes: true,        // Check for multiple type exports (default: true)
-      checkVariables: true,    // Check for multiple variable exports (default: true)
-      ignoreBarrelFiles: true  // Ignore barrel files like index.ts (default: true)
+      checkClasses: true,       // Check for multiple class exports (default: true)
+      checkFunctions: true,     // Check for multiple function exports (default: true)
+      checkInterfaces: true,    // Check for multiple interface exports (default: true)
+      checkTypes: true,         // Check for multiple type exports (default: true)
+      checkVariables: true,     // Check for multiple variable exports (default: true)
+      excludeConstants: false,  // Exclude const declarations from variable checks (default: false)
+      ignoreBarrelFiles: true   // Ignore barrel files like index.ts (default: true)
+    }]
+  }
+}
+
+// Allow multiple constants while checking other exports
+{
+  rules: {
+    'multiple-exports/no-multiple-exports': ['error', {
+      checkVariables: true,
+      excludeConstants: true  // Allow multiple const exports
     }]
   }
 }
@@ -283,9 +294,13 @@ export class MyClass {}
 export interface MyInterface {}
 export const myConstant = 42;
 
-// ❌ Multiple variable exports
+// ❌ Multiple variable exports (by default)
 export const API_URL = 'https://api.example.com';
 export const API_KEY = 'secret';
+
+// ❌ Multiple non-const variable exports (always flagged)
+export let currentUser = null;
+export let sessionData = {};
 ```
 
 ### What's Allowed?
@@ -300,10 +315,73 @@ export default class UserService {}
 // ✅ Single named export with multiple declarations
 export const { API_URL, API_KEY } = config;
 
+// ✅ Multiple const exports (when excludeConstants: true)
+export const API_URL = 'https://api.example.com';
+export const API_KEY = 'secret';
+export const VERSION = '1.0.0';
+
 // ✅ Barrel files (index.ts/index.js) - automatically exempted
 export { UserService } from './user-service';
 export { OrderService } from './order-service';
 export { ProductService } from './product-service';
+```
+
+### Constants Exclusion Feature
+
+The `excludeConstants` option provides fine-grained control over variable export checking:
+
+**When `excludeConstants: false` (default):**
+
+```javascript
+// ❌ All variable exports are treated equally
+export const API_URL = 'https://api.example.com';
+export const VERSION = '1.0.0'; // Error: Multiple exports
+export let currentUser = null;
+export let sessionData = {}; // Error: Multiple exports
+```
+
+**When `excludeConstants: true`:**
+
+```javascript
+// ✅ Multiple const exports are allowed
+export const API_URL = 'https://api.example.com';
+export const VERSION = '1.0.0';
+export const DEFAULT_TIMEOUT = 5000;
+
+// ❌ Multiple let/var exports still flagged
+export let currentUser = null;
+export let sessionData = {}; // Error: Multiple exports
+
+// ✅ Mixed const + single let/var is allowed
+export const API_URL = 'https://api.example.com';
+export const VERSION = '1.0.0';
+export let currentUser = null; // Only one non-const variable
+```
+
+**Option Interaction:**
+
+- `excludeConstants` only takes effect when `checkVariables: true`
+- When `checkVariables: false`, all variable exports are ignored regardless of `excludeConstants`
+- Perfect for projects with configuration files that export multiple constants
+
+**Common Use Cases:**
+
+```javascript
+// Configuration files - multiple constants
+export const API_ENDPOINTS = {
+  users: '/api/users',
+  orders: '/api/orders',
+};
+export const TIMEOUTS = { default: 5000, upload: 30000 };
+export const ENVIRONMENT = process.env.NODE_ENV;
+
+// Error codes and constants
+export const ERROR_CODES = {
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+};
+export const HTTP_STATUS = { OK: 200, NOT_FOUND: 404 };
+export const DEFAULT_HEADERS = { 'Content-Type': 'application/json' };
 ```
 
 ### Barrel File Detection

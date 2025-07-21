@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "task-trellis-test": {
+    "task-trellis": {
       "type": "stdio",
       "command": "uvx",
       "args": [
