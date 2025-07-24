@@ -2,22 +2,6 @@
 
 A collection of custom ESLint plugins for enforcing code quality standards.
 
-## Installation
-
-This package is published to GitHub Packages. To install:
-
-1. Create a `.npmrc` file in your project root:
-
-```
-@langadventurellc:registry=https://npm.pkg.github.com
-```
-
-2. Install the package:
-
-```bash
-npm install @langadventurellc/tsla-linter --save-dev
-```
-
 ## Usage
 
 This package provides ESLint plugins for enforcing code quality standards:
