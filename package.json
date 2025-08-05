@@ -29,8 +29,8 @@
     "eslintplugin",
     "eslint-plugin"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "LangAdventure LLC",
+  "license": "GPL-3.0-only",
   "engines": {
     "node": ">=14.0.0"
   },

@@ -189,6 +189,13 @@ const multipleExportsRule: Rule.RuleModule = {
         }
       },
 
+      ExportAllDeclaration(node: ESTree.ExportAllDeclaration): void {
+        // Handle export * from 'module' statements
+        const source = node.source?.value || 'unknown';
+        const name = `* from '${source}'`;
+        exports.push({ type: 'specifier', name, node });
+      },
+
       'Program:exit'(): void {
         checkForViolations();
       },
