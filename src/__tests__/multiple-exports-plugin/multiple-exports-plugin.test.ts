@@ -10,7 +10,7 @@ const ruleTester = new RuleTester({
     parser: require('@typescript-eslint/parser'),
     parserOptions: {
       ecmaFeatures: {
-        jsx: false,
+        jsx: true,
       },
     },
   },
@@ -50,6 +50,10 @@ describe('multiple-exports-plugin', () => {
           // Single export specifier
           {
             code: 'const value = 42; export { value };',
+          },
+          // Single export * statement
+          {
+            code: "export * from './module';",
           },
           // Empty file
           {
@@ -126,6 +130,32 @@ export const myVar = 42;`,
               },
             ],
           },
+          // Multiple export * statements
+          {
+            code: `export * from './module1';
+export * from './module2';`,
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '2 export specifiers',
+                },
+              },
+            ],
+          },
+          // Mixed export * with other exports
+          {
+            code: `export * from './module1';
+export function myFunction() { return true; }`,
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '1 function, 1 export specifier',
+                },
+              },
+            ],
+          },
         ],
       });
     });
@@ -161,6 +191,28 @@ export const myVar = 42;`,
               type: 'FunctionDeclaration',
               id: { name: 'func2', type: 'Identifier' },
             },
+          } as any);
+        }
+
+        if (ruleInstance['Program:exit']) {
+          ruleInstance['Program:exit']({} as any);
+        }
+        expect(mockContext.report).not.toHaveBeenCalled();
+      });
+
+      test('should not report violations for export * statements in barrel files', () => {
+        const ruleInstance = rule.create(mockContext as unknown as Rule.RuleContext);
+
+        // Simulate multiple export * statements in barrel file
+        if (ruleInstance.ExportAllDeclaration) {
+          ruleInstance.ExportAllDeclaration({
+            type: 'ExportAllDeclaration',
+            source: { type: 'Literal', value: './module1' },
+          } as any);
+
+          ruleInstance.ExportAllDeclaration({
+            type: 'ExportAllDeclaration',
+            source: { type: 'Literal', value: './module2' },
           } as any);
         }
 
@@ -245,6 +297,21 @@ export function func2() { return 2; }`,
                   messageId: 'multipleExportsDetailed',
                   data: {
                     exportTypes: '2 functions',
+                  },
+                },
+              ],
+            },
+            // Should report violations for export * statements in barrel files when option is false
+            {
+              code: `export * from './module1';
+export * from './module2';`,
+              filename: '/test/index.ts',
+              options: [{ ignoreBarrelFiles: false }],
+              errors: [
+                {
+                  messageId: 'multipleExportsDetailed',
+                  data: {
+                    exportTypes: '2 export specifiers',
                   },
                 },
               ],
@@ -338,6 +405,183 @@ export class MyClass {}`,
                 messageId: 'multipleExportsDetailed',
                 data: {
                   exportTypes: '1 class, 2 functions',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    describe('excludeConstants option', () => {
+      ruleTester.run('no-multiple-exports (excludeConstants)', rule, {
+        valid: [
+          // Should allow multiple const exports when excludeConstants is true
+          {
+            code: `export const AIServiceContext = createContext(undefined);
+export const useAIServiceContext = () => {
+  const context = useContext(AIServiceContext);
+  return context;
+};
+export function AIServiceProvider({ children }) {
+  return <div>{children}</div>;
+}`,
+            options: [{ excludeConstants: true }],
+          },
+          // Should allow const exports mixed with functions when excludeConstants is true
+          {
+            code: `import React, { createContext, useContext } from "react";
+
+const AIServiceContext = createContext(undefined);
+
+export const useAIServiceContext = () => {
+  const context = useContext(AIServiceContext);
+  if (context === undefined) {
+    throw new Error(
+      "useAIServiceContext must be used within an AIServiceProvider",
+    );
+  }
+  return context;
+};
+
+export function AIServiceProvider({ children }) {
+  const value = {
+    isConfigured: false,
+    availableModels: [],
+  };
+
+  return (
+    <AIServiceContext.Provider value={value}>
+      {children}
+    </AIServiceContext.Provider>
+  );
+}`,
+            options: [{ excludeConstants: true }],
+          },
+          // Should still allow mixed const and let/var when only const is excluded
+          {
+            code: `export const constVar = 1;
+export let letVar = 2;`,
+            options: [{ excludeConstants: true }],
+          },
+          // Your exact use case - should be valid when excludeConstants is true
+          {
+            code: `import React, { createContext, useContext, ReactNode } from "react";
+
+interface AIServiceContextType {
+  // Placeholder for future AI service integration
+  isConfigured: boolean;
+  availableModels: string[];
+}
+
+const AIServiceContext = createContext<AIServiceContextType | undefined>(
+  undefined,
+);
+
+export const useAIServiceContext = () => {
+  const context = useContext(AIServiceContext);
+  if (context === undefined) {
+    throw new Error(
+      "useAIServiceContext must be used within an AIServiceProvider",
+    );
+  }
+  return context;
+};
+
+interface AIServiceProviderProps {
+  children: ReactNode;
+}
+
+export function AIServiceProvider({ children }: AIServiceProviderProps) {
+  const value: AIServiceContextType = {
+    isConfigured: false, // Placeholder - will be implemented in future tasks
+    availableModels: [], // Placeholder - will be populated with actual AI models
+  };
+
+  return (
+    <AIServiceContext.Provider value={value}>
+      {children}
+    </AIServiceContext.Provider>
+  );
+}`,
+            options: [{ excludeConstants: true }],
+          },
+        ],
+        invalid: [
+          // Should still report multiple const exports when excludeConstants is false
+          {
+            code: `export const constVar1 = 1;
+export const constVar2 = 2;`,
+            options: [{ excludeConstants: false }],
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '2 variables',
+                },
+              },
+            ],
+          },
+          // Should report multiple non-const variable exports even when excludeConstants is true
+          {
+            code: `export let letVar1 = 1;
+export let letVar2 = 2;`,
+            options: [{ excludeConstants: true }],
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '2 variables',
+                },
+              },
+            ],
+          },
+          // Real-world case: this should NOT fail when excludeConstants is true (const should be excluded)
+          // But when excludeConstants is false, it should fail
+          {
+            code: `import React, { createContext, useContext, ReactNode } from "react";
+
+interface AIServiceContextType {
+  isConfigured: boolean;
+  availableModels: string[];
+}
+
+const AIServiceContext = createContext<AIServiceContextType | undefined>(
+  undefined,
+);
+
+export const useAIServiceContext = () => {
+  const context = useContext(AIServiceContext);
+  if (context === undefined) {
+    throw new Error(
+      "useAIServiceContext must be used within an AIServiceProvider",
+    );
+  }
+  return context;
+};
+
+interface AIServiceProviderProps {
+  children: ReactNode;
+}
+
+export function AIServiceProvider({ children }: AIServiceProviderProps) {
+  const value: AIServiceContextType = {
+    isConfigured: false,
+    availableModels: [],
+  };
+
+  return (
+    <AIServiceContext.Provider value={value}>
+      {children}
+    </AIServiceContext.Provider>
+  );
+}`,
+            options: [{ excludeConstants: false }],
+            errors: [
+              {
+                messageId: 'multipleExportsDetailed',
+                data: {
+                  exportTypes: '1 function, 1 variable',
                 },
               },
             ],
