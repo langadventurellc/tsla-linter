@@ -12,12 +12,12 @@
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json}\" --log-level silent",
     "test": "jest",
     "test:watch": "jest --watch",
     "prepublishOnly": "npm run clean && npm run build",
     "prepare": "husky",
+    "quality": "npm run lint && npm run format && npm run type-check",
     "type-check": "tsc --noEmit"
   },
   "repository": {
